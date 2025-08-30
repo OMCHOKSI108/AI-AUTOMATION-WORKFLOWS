@@ -1,0 +1,4 @@
+
+
+// Simple memory expression for WhatsApp
+{{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}

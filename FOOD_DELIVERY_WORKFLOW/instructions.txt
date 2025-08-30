@@ -1,0 +1,2 @@
+// For collecting date
+{{ $now.format('yyyy-MM-dd hh-mm-ss a') }}
