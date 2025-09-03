@@ -1,16 +1,21 @@
-version: '3.7'
+version: "3.1"
+
 services:
   n8n:
-    image: n8nio/n8n:latest
-    restart: unless-stopped
+    image: n8nio/n8n
+    restart: always
     ports:
       - "5678:5678"
     environment:
-      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
-      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
-      - N8N_HOST=0.0.0.0
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - GENERIC_LANGUAGE=en
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_BASIC_AUTH_USER=admin@gmail.com
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_TELEGRAM_USE_POLLING=true
+      - N8N_HOST=ab12-34-56-78-90.ngrok-free.app
+      - N8N_HOST=localhost
       - N8N_PORT=5678
-      - WEBHOOK_URL=${WEBHOOK_URL}
+      - WEBHOOK_URL=http://localhost:5678/
     volumes:
-      - ./n8n:/home/node/.n8n
+      - ./n8n_data:/home/node/.n8n
