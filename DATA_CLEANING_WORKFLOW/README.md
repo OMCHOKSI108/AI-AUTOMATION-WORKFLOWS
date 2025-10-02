@@ -9,10 +9,10 @@ The system automatically:
 
 1. Cleans the data
 2. Runs **EDA (Exploratory Data Analysis)**
-3. Uses **Gemini AI** to decide the best analysis methods
+3. Uses **Gemini AI,groq** to decide the best analysis methods
 4. Generates **plots + insights**
 5. Saves results in **PostgreSQL**
-6. Displays results in a **Next.js frontend**
+6. Displays results in a **react.js frontend**
 
 ---
 
@@ -193,7 +193,7 @@ Frontend (Next.js)
 
 ## 💰 Cost & Free Tiers
 
-* **Vercel (Next.js)** → Free (125GB bandwidth / 100GB-hours runtime).
+* **Vercel (react.js)** → Free (125GB bandwidth / 100GB-hours runtime).
 * **Google Drive** → Free 15GB.
 * **PostgreSQL** → Free (Supabase, Neon, Render).
 * **n8n** → Free self-host / Docker.
@@ -207,7 +207,7 @@ Frontend (Next.js)
 
 * Add support for **Excel, PDF, JSON, Parquet**.
 * Interactive dashboard with **Plotly/Streamlit**.
-* User authentication (Supabase Auth).
+* User authentication (postgresql Auth).
 * Paid tier (larger files, advanced ML like clustering, PCA, forecasting).
 
 ---

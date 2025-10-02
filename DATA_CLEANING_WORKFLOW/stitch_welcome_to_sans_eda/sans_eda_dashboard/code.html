@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Data Insights Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1173d4",
+                        "background": "#f6f7f8",
+                        "foreground": "#0f172a",
+                        "card": "#ffffff",
+                        "card-foreground": "#0f172a",
+                        "muted": "#f1f5f9",
+                        "muted-foreground": "#64748b",
+                        "border": "#e2e8f0",
+                        "input": "#e2e8f0",
+                        "ring": "#94a3b8",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "lg": "0.5rem",
+                        "md": "calc(0.5rem - 2px)",
+                        "sm": "calc(0.5rem - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background font-display text-foreground">
+<div class="flex min-h-screen">
+<aside class="flex w-64 flex-col border-r border-border bg-card">
+<div class="flex h-16 items-center justify-center border-b border-border px-4">
+<svg class="h-8 w-8 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<h1 class="ml-2 text-xl font-bold text-card-foreground">Data Insights</h1>
+</div>
+<nav class="flex-1 space-y-2 px-2 py-4">
+<a class="flex items-center rounded-md bg-muted px-4 py-2 text-primary" href="#">
+<span class="material-symbols-outlined mr-3">upload_file</span>
+                    Upload
+                </a>
+<a class="flex items-center rounded-md px-4 py-2 text-muted-foreground hover:bg-muted" href="#">
+<span class="material-symbols-outlined mr-3">history</span>
+                    History
+                </a>
+<a class="flex items-center rounded-md px-4 py-2 text-muted-foreground hover:bg-muted" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+                    Settings
+                </a>
+</nav>
+<div class="border-t border-border p-4">
+<div class="flex items-center">
+<img alt="User avatar" class="h-10 w-10 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAggPBsaFaDH6KDeBlavr-_Zr5mtgs-DIia5mBpQnRNiCJPmZReXULzpIPl0PkmfhckAaqE0r_sKoLJtjZ6RQzUAm9lpGYW8QDsxwdLagDUcBu6KJsM0tAS_V3KxxtHGxcddOCejJk6v8on4FhSRFmJul0n8aUrYSpDg7xZtzjB1I8ZYzIC6a4tDbYsUzsNAupLiRFaxgUkUVwLCCYjVGTpg8ka7Hntn1F4HMsS2DgX2To_CeUg0luncyfb_qHjKKvIVoZ9cPdYA"/>
+<div class="ml-3">
+<p class="text-sm font-medium text-card-foreground">Jane Doe</p>
+<p class="text-xs text-muted-foreground">jane.doe@example.com</p>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex flex-1 flex-col">
+<header class="flex h-16 items-center justify-end border-b border-border px-6">
+<button class="rounded-md bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted">
+                    Logout
+                </button>
+</header>
+<main class="flex-1 p-8" id="main-content">
+<div class="mx-auto max-w-2xl">
+<div id="upload-form">
+<h2 class="mb-6 text-3xl font-bold text-foreground">Upload Dataset</h2>
+<div class="rounded-lg border border-border bg-card p-6">
+<form class="space-y-4" onsubmit="showLoading(event)">
+<div>
+<label class="text-sm font-medium text-muted-foreground" for="file-upload">Select a file</label>
+<div class="mt-2 flex justify-center rounded-md border-2 border-dashed border-border px-6 pb-6 pt-5">
+<div class="space-y-1 text-center">
+<span class="material-symbols-outlined text-5xl text-muted-foreground">cloud_upload</span>
+<div class="flex text-sm text-muted-foreground">
+<label class="relative cursor-pointer rounded-md bg-transparent font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2" for="file-upload">
+<span>Upload a file</span>
+<input accept=".csv, .xlsx, .txt" class="sr-only" id="file-upload" name="file-upload" required="" type="file"/>
+</label>
+<p class="pl-1">or drag and drop</p>
+</div>
+<p class="text-xs text-muted-foreground">CSV, XLSX, TXT up to 10MB</p>
+</div>
+</div>
+</div>
+<div>
+<button class="flex w-full justify-center rounded-md border border-transparent bg-primary px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="submit">
+                                        Submit
+                                    </button>
+</div>
+</form>
+</div>
+</div>
+<div class="mt-8 hidden rounded-lg border border-border bg-card p-6" id="loading-indicator">
+<div class="flex items-center">
+<svg aria-hidden="true" class="h-8 w-8 animate-spin fill-primary text-muted" fill="none" viewBox="0 0 100 101" xmlns="http://www.w3.org/2000/svg">
+<path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"></path>
+<path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"></path>
+</svg>
+<div class="ml-4">
+<h3 class="text-lg font-semibold text-foreground">Your file is being analyzed...</h3>
+<p class="text-sm text-muted-foreground">Please wait while we process your data.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+<script>
+        function showLoading(event) {
+            const fileInput = document.getElementById('file-upload');
+            if (fileInput.files.length > 0) {
+                event.preventDefault();
+                document.getElementById('upload-form').classList.add('hidden');
+                document.getElementById('loading-indicator').classList.remove('hidden');
+                // Simulate analysis time
+                setTimeout(() => {
+                    // Here you would typically handle the file upload and then show results.
+                    // For this example, we'll just go back to the form.
+                    document.getElementById('loading-indicator').classList.add('hidden');
+                    document.getElementById('upload-form').classList.remove('hidden');
+                    alert('Analysis complete!');
+                }, 5000);
+            }
+        }
+    </script>
+
+</body></html>
