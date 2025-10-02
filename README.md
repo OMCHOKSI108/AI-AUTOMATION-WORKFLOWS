@@ -57,10 +57,3 @@ See the converted-example and commands in the repo README if you need GIF conver
 - `docker-compose.yml` — quick Docker Compose for n8n
 - `.env.example` — example environment variables for n8n
 
-## Next steps you can ask me to do
-- Convert a short clip to GIF and add it to the repo (I can generate ffmpeg commands).
-- Add a sample `workflow.json` with a minimal n8n workflow that triggers a simple AI agent (requires details on provider/API keys).
-- Help with deploying to a public host or generating a YouTube upload description/title.
-
----
-
