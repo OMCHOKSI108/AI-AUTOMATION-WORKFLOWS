@@ -1,10 +1,38 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { dataAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 const AnalysisReport = () => {
-    const navigate = useNavigate();
+    const location = useLocation();
+    const [report, setReport] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const reportId = location.state?.reportId;
+        if (reportId) {
+            fetchReport(reportId);
+        } else {
+            toast.error('No report ID provided');
+            setLoading(false);
+        }
+    }, [location.state]);
+
+    const fetchReport = async (reportId) => {
+        try {
+            setLoading(true);
+            const response = await dataAPI.getReport(reportId);
+            setReport(response);
+        } catch (error) {
+            console.error('Failed to fetch report:', error);
+            toast.error('Failed to load report');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div style={{ width: '100%', margin: 0, padding: 0, fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ width: '100%', margin: 0, padding: 0, fontFamily: 'Inter, sans-serif', overflowX: 'hidden' }}>
             <div className="flex min-h-screen w-full flex-col" style={{ margin: 0 }}>
                 <header className="sticky top-0 z-10 flex h-16 items-center border-b border-gray-200 bg-white bg-opacity-80 px-4 backdrop-blur-sm sm:px-6 lg:px-8">
                     <div className="flex w-full items-center justify-between">
@@ -12,10 +40,10 @@ const AnalysisReport = () => {
                             <svg className="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeLinecap="round" strokeLinejoin="round"></path>
                             </svg>
-                            <h1 className="text-xl font-bold">Localytics</h1>
+                            <h1 className="text-xl font-bold">SANS EDA</h1>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button className="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600">
+                            <button className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2" style={{ backgroundColor: '#1173d4', borderColor: '#1173d4' }} onMouseOver={(e) => e.target.style.backgroundColor = '#0e5bb5'} onMouseOut={(e) => e.target.style.backgroundColor = '#1173d4'}>
                                 <span className="material-symbols-outlined text-base">picture_as_pdf</span>
                                 Get PDF Export
                             </button>

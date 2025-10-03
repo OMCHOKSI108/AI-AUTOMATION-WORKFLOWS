@@ -1,4 +1,4 @@
-const { createTables } = require('./migrations/createTables');
+const { createTables } = require('../migrations/createTables');
 
 async function setupDatabase() {
     try {

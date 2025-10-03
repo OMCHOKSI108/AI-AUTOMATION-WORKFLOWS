@@ -5,8 +5,93 @@ import toast from 'react-hot-toast';
 import LoadingSpinner from './LoadingSpinner';
 
 const Signup = () => {
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
+    const { signup, error, clearError, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
+    // Clear errors when component mounts or form data changes
+    useEffect(() => {
+        if (error) {
+            clearError();
+        }
+    }, [formData, error, clearError]);
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard');
+        }
+    }, [isAuthenticated, navigate]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const validateForm = () => {
+        if (!formData.username.trim()) {
+            toast.error('Username is required');
+            return false;
+        }
+        if (formData.username.length < 3) {
+            toast.error('Username must be at least 3 characters');
+            return false;
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+            toast.error('Username can only contain letters, numbers, and underscores');
+            return false;
+        }
+        if (!formData.email.trim()) {
+            toast.error('Email is required');
+            return false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            toast.error('Please enter a valid email address');
+            return false;
+        }
+        if (!formData.password.trim()) {
+            toast.error('Password is required');
+            return false;
+        }
+        if (formData.password.length < 6) {
+            toast.error('Password must be at least 6 characters');
+            return false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            toast.error('Passwords do not match');
+            return false;
+        }
+        return true;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) return;
+
+        try {
+            await signup({
+                username: formData.username.trim(),
+                email: formData.email.trim(),
+                password: formData.password
+            });
+
+            toast.success('Account created successfully! You are now logged in.');
+            navigate('/dashboard');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Signup failed');
+        }
+    };
     return (
-        <div style={{ backgroundColor: 'var(--background-light)', fontFamily: 'Inter, sans-serif', width: '100%', minHeight: '100vh', margin: 0, padding: 0 }}>
+        <div style={{ backgroundColor: 'var(--background-light)', fontFamily: 'Inter, sans-serif', width: '100%', minHeight: '100vh', margin: 0, padding: 0, overflowX: 'hidden' }}>
             <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div>
@@ -29,7 +114,7 @@ const Signup = () => {
                             to start analyzing your data
                         </p>
                     </div>
-                    <form action="#" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }} method="POST">
+                    <form onSubmit={handleSubmit} style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <input name="remember" type="hidden" value="true" />
                         <div style={{ borderRadius: '0.375rem', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }}>
                             <div>
@@ -52,6 +137,8 @@ const Signup = () => {
                                     placeholder="Email address"
                                     required
                                     type="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
                                     onFocus={(e) => {
                                         e.target.style.zIndex = '10';
                                         e.target.style.borderColor = 'var(--primary-color)';
@@ -83,6 +170,8 @@ const Signup = () => {
                                     placeholder="Username"
                                     required
                                     type="text"
+                                    value={formData.username}
+                                    onChange={handleInputChange}
                                     onFocus={(e) => {
                                         e.target.style.zIndex = '10';
                                         e.target.style.borderColor = 'var(--primary-color)';
@@ -102,7 +191,7 @@ const Signup = () => {
                                         display: 'block',
                                         width: '100%',
                                         appearance: 'none',
-                                        borderRadius: '0 0 0.375rem 0.375rem',
+                                        borderRadius: '0',
                                         border: '1px solid #d1d5db',
                                         borderTop: 'none',
                                         padding: '0.5rem 0.75rem',
@@ -114,6 +203,41 @@ const Signup = () => {
                                     placeholder="Password"
                                     required
                                     type="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    onFocus={(e) => {
+                                        e.target.style.zIndex = '10';
+                                        e.target.style.borderColor = 'var(--primary-color)';
+                                        e.target.style.outline = 'none';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.borderColor = '#d1d5db';
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label className="sr-only" htmlFor="confirmPassword">Confirm Password</label>
+                                <input
+                                    autoComplete="current-password"
+                                    style={{
+                                        position: 'relative',
+                                        display: 'block',
+                                        width: '100%',
+                                        appearance: 'none',
+                                        borderRadius: '0 0 0.375rem 0.375rem',
+                                        border: '1px solid #d1d5db',
+                                        borderTop: 'none',
+                                        padding: '0.5rem 0.75rem',
+                                        color: '#111827',
+                                        fontSize: '0.875rem'
+                                    }}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    placeholder="Confirm Password"
+                                    required
+                                    type="password"
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange}
                                     onFocus={(e) => {
                                         e.target.style.zIndex = '10';
                                         e.target.style.borderColor = 'var(--primary-color)';

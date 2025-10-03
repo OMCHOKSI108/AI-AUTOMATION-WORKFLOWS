@@ -43,6 +43,16 @@ router.post('/signup', async (req, res, next) => {
             return res.status(400).json({ error: 'Password must be at least 6 characters long' });
         }
 
+        // Test database connection first
+        try {
+            await db.testConnection();
+        } catch (dbError) {
+            return res.status(503).json({
+                error: 'Database connection unavailable. Please check if PostgreSQL is running.',
+                details: 'The application requires PostgreSQL to be installed and running on localhost:5432'
+            });
+        }
+
         // Check if user already exists
         const existingUser = await db.query(
             'SELECT id FROM users WHERE username = $1 OR email = $2',

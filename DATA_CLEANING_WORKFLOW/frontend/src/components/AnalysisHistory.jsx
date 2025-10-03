@@ -1,128 +1,136 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { dataAPI } from '../services/api';
+import toast from 'react-hot-toast';
 
 const AnalysisHistory = () => {
-    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [reports, setReports] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        fetchHistory();
+    }, [page]);
+
+    const fetchHistory = async () => {
+        try {
+            setLoading(true);
+            const response = await dataAPI.getHistory(page, 20);
+            setReports(response.reports);
+            setTotalPages(response.pagination.totalPages);
+        } catch (error) {
+            console.error('Failed to fetch history:', error);
+            toast.error('Failed to load analysis history');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="bg-background-light text-slate-800" style={{ fontFamily: 'Inter, sans-serif', width: '100%', margin: 0, padding: 0 }}>
-            <div className="flex flex-col min-h-screen" style={{ width: '100%', margin: 0 }}>
-                <header className="sticky top-0 bg-background-light/80 backdrop-blur-sm z-10">
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-between h-16 border-b border-slate-200">
-                            <div className="flex items-center gap-4">
-                                <div className="text-primary size-8">
-                                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_6_330)">
-                                            <path clipRule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fillRule="evenodd"></path>
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_6_330">
-                                                <rect fill="white" height="48" width="48"></rect>
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </div>
-                                <h1 className="text-lg font-bold text-slate-800">SANS EDA</h1>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-                                    <Link to="/dashboard" className="text-slate-600 hover:text-primary">Upload</Link>
-                                    <Link to="/analysis-history" className="text-primary font-semibold">History</Link>
-                                    <Link to="/settings" className="text-slate-600 hover:text-primary">Settings</Link>
-                                </nav>
-                                <div className="relative">
-                                    <div className="w-10 h-10 rounded-full bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA0Jze7UrePEe9x8I0jrdk3eF97NCl8OyFVyHywb0sSuXkd8NGxtrYFVcVMMc_P4Nmw5bQAUEdPDEXx8t6T87iPj07dopEa8tpeq9N1NQ7pJodA90vlJXN7C3h1O9STYCN7M73ZW051Qh0NFbWuxT6e0UP2Y6m2rMZq_P-xUi0IKUuAvzIIg8cJeIFkvFbhFGySpIgqBCMheuheK1YF_PJMKGTzlwKCKYogkwqWOLTjDSO4dWnGmHI2JUX2KYUzrM4AK5AC_yuNwA")' }}></div>
-                                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-background-light"></span>
-                                </div>
-                            </div>
+        <div className="text-black" style={{ fontFamily: 'Inter, sans-serif', width: '100%', margin: 0, padding: 0, backgroundColor: '#f6f7f8', overflowX: 'hidden', height: '100vh' }}>
+            <div className="flex h-full" style={{ width: '100%', margin: 0 }}>
+                <aside className={`flex w-64 md:w-80 bg-white border-r flex-col fixed md:relative z-50 h-full transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`} style={{ borderColor: '#e2e8f0' }}>
+                    <div className="p-6 flex items-center gap-3">
+                        <div className="bg-blue-600 text-white rounded-full size-10 flex items-center justify-center font-bold text-lg">
+                            {user?.username?.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-bold">SANS EDA</h1>
+                            <p className="text-sm text-gray-600">{user?.username}</p>
                         </div>
                     </div>
-                </header>
-                <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold tracking-tight text-slate-800">Past Analyses</h2>
-                            <p className="mt-2 text-slate-500">Review your previously generated analysis reports.</p>
+                    <nav className="flex-1 px-4 py-2 space-y-2">
+                        <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                            <span className="material-symbols-outlined">upload_file</span>
+                            <span>Upload</span>
+                        </Link>
+                        <Link to="/analysis-history" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black bg-blue-50 text-blue-600 transition-colors">
+                            <span className="material-symbols-outlined">history</span>
+                            <span>History</span>
+                        </Link>
+                        <Link to="/analysis-report" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                            <span className="material-symbols-outlined">assessment</span>
+                            <span>Reports</span>
+                        </Link>
+                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                            <span className="material-symbols-outlined">settings</span>
+                            <span>Settings</span>
+                        </Link>
+                    </nav>
+                    <div className="p-4 mt-auto">
+                        <button
+                            onClick={() => window.location.href = '/dashboard'}
+                            className="w-full text-white font-bold py-2 px-4 rounded-lg"
+                            style={{ backgroundColor: '#1173d4', cursor: 'pointer' }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#0e5bb5'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#1173d4'}
+                        >
+                            New Analysis
+                        </button>
+                    </div>
+                </aside>
+                {isMobileMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}></div>}
+                <main className="flex-1 h-full p-4 md:p-8 overflow-y-auto">
+                    <div className="md:hidden flex items-center justify-between mb-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
+                        <h2 className="text-xl font-bold">Past Analyses</h2>
+                    </div>
+                    <div className="w-full">
+                        <div className="hidden md:block mb-8">
+                            <h2 className="text-3xl font-bold tracking-tight text-black">Past Analyses</h2>
+                            <p className="mt-2 text-gray-600">Review your previously generated analysis reports.</p>
                         </div>
                         <div className="mb-6">
                             <div className="relative">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                                <input className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Search analyses..." type="text" />
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                                <input className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600" placeholder="Search analyses..." type="text" />
                             </div>
                         </div>
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                            <ul className="divide-y divide-gray-200">
-                                <li className="group">
-                                    <a className="flex items-center justify-between p-4 hover:bg-gray-50" href="#">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                                                <span className="material-symbols-outlined">analytics</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-gray-800">Q3 2023 Sales Performance Analysis</p>
-                                                <p className="text-sm text-gray-500">Generated on: 2023-10-15</p>
-                                            </div>
-                                        </div>
-                                        <span className="material-symbols-outlined text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li className="group">
-                                    <a className="flex items-center justify-between p-4 hover:bg-slate-50" href="#">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-primary/10 text-primary p-2 rounded-lg">
-                                                <span className="material-symbols-outlined">bar_chart</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-800">Website Traffic &amp; User Engagement Report</p>
-                                                <p className="text-sm text-slate-500">Generated on: 2023-09-28</p>
-                                            </div>
-                                        </div>
-                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li className="group">
-                                    <a className="flex items-center justify-between p-4 hover:bg-slate-50" href="#">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-primary/10 text-primary p-2 rounded-lg">
-                                                <span className="material-symbols-outlined">pie_chart</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-800">Marketing Campaign ROI Analysis</p>
-                                                <p className="text-sm text-slate-500">Generated on: 2023-09-05</p>
-                                            </div>
-                                        </div>
-                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li className="group">
-                                    <a className="flex items-center justify-between p-4 hover:bg-slate-50" href="#">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-primary/10 text-primary p-2 rounded-lg">
-                                                <span className="material-symbols-outlined">show_chart</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-800">Customer Churn Prediction Model</p>
-                                                <p className="text-sm text-slate-500">Generated on: 2023-08-21</p>
-                                            </div>
-                                        </div>
-                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1">chevron_right</span>
-                                    </a>
-                                </li>
-                                <li className="group">
-                                    <a className="flex items-center justify-between p-4 hover:bg-slate-50" href="#">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-primary/10 text-primary p-2 rounded-lg">
-                                                <span className="material-symbols-outlined">inventory</span>
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-slate-800">Inventory Optimization Analysis</p>
-                                                <p className="text-sm text-slate-500">Generated on: 2023-07-30</p>
-                                            </div>
-                                        </div>
-                                        <span className="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1">chevron_right</span>
-                                    </a>
-                                </li>
-                            </ul>
+                            {loading ? (
+                                <div className="p-8 text-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                    <p className="mt-2 text-gray-500">Loading analysis history...</p>
+                                </div>
+                            ) : reports.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <span className="material-symbols-outlined text-4xl text-gray-300">analytics</span>
+                                    <p className="mt-2 text-gray-500">No analysis reports found.</p>
+                                    <p className="text-sm text-gray-400">Upload a dataset to get started.</p>
+                                </div>
+                            ) : (
+                                <ul className="divide-y divide-gray-200">
+                                    {reports.map((report) => (
+                                        <li key={report.report_id} className="group">
+                                            <Link to={`/analysis-report`} state={{ reportId: report.report_id }} className="flex items-center justify-between p-4 hover:bg-gray-50">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
+                                                        <span className="material-symbols-outlined">analytics</span>
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-800">{report.original_filename}</p>
+                                                        <p className="text-sm text-gray-500">
+                                                            Status: <span className={`font-medium ${report.status === 'completed' ? 'text-green-600' : report.status === 'failed' ? 'text-red-600' : 'text-yellow-600'}`}>
+                                                                {report.status}
+                                                            </span> | Generated on: {new Date(report.created_at).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <span className="material-symbols-outlined text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1">chevron_right</span>
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
                 </main>

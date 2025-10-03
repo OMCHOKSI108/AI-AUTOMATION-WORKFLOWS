@@ -21,7 +21,7 @@ const Login = () => {
         if (error) {
             clearError();
         }
-    }, [formData]);
+    }, [formData, error, clearError]);
 
     // Redirect if already authenticated
     useEffect(() => {
@@ -77,7 +77,7 @@ const Login = () => {
     };
 
     return (
-        <div style={{ backgroundColor: 'var(--background-color)', fontFamily: 'Inter, sans-serif', color: 'var(--text-color)', minHeight: '100vh', width: '100%', margin: 0, padding: '1rem' }}>
+        <div style={{ backgroundColor: 'var(--background-color)', fontFamily: 'Inter, sans-serif', color: 'var(--text-color)', minHeight: '100vh', width: '100%', margin: 0, padding: '1rem', overflowX: 'hidden' }}>
             <div style={{ display: 'flex', minHeight: '100vh', width: '100%', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb', margin: 0 }}>
                 <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div>

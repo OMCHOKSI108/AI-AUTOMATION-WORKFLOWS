@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: sans_eda
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ""
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./DATA_CLEANING_WORKFLOW/backend/setup-database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # n8n Workflow Automation
+  n8n:
+    image: n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - GENERIC_LANGUAGE=en
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_BASIC_AUTH_USER=admin@gmail.com
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_TELEGRAM_USE_POLLING=true
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Backend API Server
+  backend:
+    build:
+      context: ./DATA_CLEANING_WORKFLOW/backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=sans_eda
+      - DB_USER=postgres
+      - DB_PASSWORD=""
+      - JWT_SECRET=your_super_secret_key_for_jwt_change_this_in_production
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook-test/start-analysis
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./DATA_CLEANING_WORKFLOW/backend/uploads:/app/uploads
+
+  # Frontend Development Server (optional - for production use nginx)
+  frontend:
+    build:
+      context: ./DATA_CLEANING_WORKFLOW/frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
