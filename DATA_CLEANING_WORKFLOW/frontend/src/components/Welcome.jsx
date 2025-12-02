@@ -1,203 +1,206 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { BarChart3, Zap, Shield, TrendingUp, Database, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 
 const Welcome = () => {
     const { isAuthenticated, user } = useAuth();
     const navigate = useNavigate();
 
+    const features = [
+        { icon: Zap, title: 'Lightning Fast', description: 'Automated EDA in seconds with AI-powered insights' },
+        { icon: Shield, title: 'Secure & Private', description: 'Your data stays encrypted and protected' },
+        { icon: TrendingUp, title: 'Smart Analytics', description: 'Advanced statistical analysis and visualizations' },
+        { icon: Database, title: 'Multi-Format', description: 'Supports CSV, Excel, JSON and more' },
+    ];
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#f0f2f5', fontFamily: 'Inter, sans-serif', color: '#111827', overflowX: 'hidden' }}>
-            <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        zIndex: 0,
-                        opacity: 0.1
-                    }}
-                >
-                    <source src="https://cdn.pixabay.com/video/2024/05/27/211592_large.mp4" type="video/mp4" />
-                </video>
-                <div style={{ position: 'relative', display: 'flex', height: '100%', width: '100%', flexDirection: 'column', zIndex: 1 }}>
-                    <header style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, width: '100%' }}>
-                        <div style={{ width: '100%', padding: '1rem 2rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <svg
-                                        style={{ height: '2rem', width: 'auto', color: '#3b82f6' }}
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="M12 21a9.004 9.004 0 0 0 8.716-6.983c.205-.536.42-.997.42-1.442 0-3.328-5.373-6-12-6S.864 9.247.864 12.575c0 .445.215.906.42 1.442A9.004 9.004 0 0 0 12 21Z"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
-                                    <span style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111827' }}>SANS EDA</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    {isAuthenticated ? (
-                                        <>
-                                            <span style={{ fontSize: '0.875rem', color: '#6b7280', marginRight: '1rem' }}>
-                                                Welcome back, {user?.username}!
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => navigate('/dashboard')}
-                                                style={{
-                                                    padding: '0.5rem 1rem',
-                                                    borderRadius: '0.5rem',
-                                                    backgroundColor: '#3b82f6',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#ffffff',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 150ms'
-                                                }}
-                                                onMouseOver={(e) => e.target.style.backgroundColor = '#2563eb'}
-                                                onMouseOut={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                                            >
-                                                Go to Dashboard
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button
-                                                type="button"
-                                                onClick={() => navigate('/login')}
-                                                style={{
-                                                    padding: '0.5rem 1rem',
-                                                    borderRadius: '0.5rem',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#1f2937',
-                                                    backgroundColor: '#e5e7eb',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 150ms'
-                                                }}
-                                                onMouseOver={(e) => e.target.style.backgroundColor = '#d1d5db'}
-                                                onMouseOut={(e) => e.target.style.backgroundColor = '#e5e7eb'}
-                                            >
-                                                Login
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => navigate('/signup')}
-                                                style={{
-                                                    padding: '0.5rem 1rem',
-                                                    borderRadius: '0.5rem',
-                                                    backgroundColor: '#3b82f6',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#ffffff',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    transition: 'background-color 150ms'
-                                                }}
-                                                onMouseOver={(e) => e.target.style.backgroundColor = '#2563eb'}
-                                                onMouseOut={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                                            >
-                                                Signup
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-orange-50">
+            {/* Header */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex items-center gap-2">
+                            <BarChart3 className="h-8 w-8 text-[#ff9900]" strokeWidth={2.5} />
+                            <span className="text-xl font-bold text-[#232f3e]">
+                                AutoEDA <span className="text-[#ff9900]">Studio</span>
+                            </span>
                         </div>
-                    </header>
-                    <main style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-                            <h1 style={{
-                                fontSize: 'clamp(3rem, 10vw, 4.5rem)',
-                                fontWeight: '900',
-                                letterSpacing: '-0.05em',
-                                color: '#111827',
-                                marginBottom: '1rem'
-                            }}>
-                                SANS EDA
-                            </h1>
-                            <p style={{
-                                fontSize: 'clamp(1rem, 3vw, 1.25rem)',
-                                color: '#6b7280',
-                                fontWeight: '500',
-                                maxWidth: '600px',
-                                margin: '0 auto 2rem'
-                            }}>
-                                Exploratory Data Analysis Made Simple
-                            </p>
-                            {!isAuthenticated && (
-                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <div className="flex items-center gap-3">
+                            {isAuthenticated ? (
+                                <>
+                                    <span className="hidden md:block text-sm text-gray-600 mr-2">
+                                        Welcome back, <span className="font-semibold">{user?.username}</span>!
+                                    </span>
                                     <button
-                                        type="button"
-                                        onClick={() => navigate('/signup')}
-                                        style={{
-                                            padding: '0.75rem 1.5rem',
-                                            borderRadius: '0.5rem',
-                                            backgroundColor: '#3b82f6',
-                                            fontSize: '1rem',
-                                            fontWeight: '600',
-                                            color: '#ffffff',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            transition: 'all 150ms',
-                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                                        }}
-                                        onMouseOver={(e) => {
-                                            e.target.style.backgroundColor = '#2563eb';
-                                            e.target.style.transform = 'translateY(-1px)';
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.target.style.backgroundColor = '#3b82f6';
-                                            e.target.style.transform = 'translateY(0)';
-                                        }}
+                                        onClick={() => navigate('/dashboard')}
+                                        className="px-5 py-2 bg-[#ff9900] text-white rounded-lg font-semibold hover:bg-[#e68a00] transition-all shadow-md hover:shadow-lg"
                                     >
-                                        Get Started Free
+                                        Go to Dashboard
                                     </button>
+                                </>
+                            ) : (
+                                <>
                                     <button
-                                        type="button"
                                         onClick={() => navigate('/login')}
-                                        style={{
-                                            padding: '0.75rem 1.5rem',
-                                            borderRadius: '0.5rem',
-                                            backgroundColor: 'transparent',
-                                            fontSize: '1rem',
-                                            fontWeight: '600',
-                                            color: '#374151',
-                                            border: '2px solid #d1d5db',
-                                            cursor: 'pointer',
-                                            transition: 'all 150ms'
-                                        }}
-                                        onMouseOver={(e) => {
-                                            e.target.style.borderColor = '#9ca3af';
-                                            e.target.style.backgroundColor = '#f9fafb';
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.target.style.borderColor = '#d1d5db';
-                                            e.target.style.backgroundColor = 'transparent';
-                                        }}
+                                        className="px-4 py-2 text-gray-700 font-medium hover:text-gray-900 transition-colors"
                                     >
-                                        Sign In
+                                        Login
                                     </button>
-                                </div>
+                                    <button
+                                        onClick={() => navigate('/signup')}
+                                        className="px-5 py-2 bg-[#ff9900] text-white rounded-lg font-semibold hover:bg-[#e68a00] transition-all shadow-md hover:shadow-lg"
+                                    >
+                                        Get Started
+                                    </button>
+                                </>
                             )}
                         </div>
-                    </main>
+                    </div>
                 </div>
-            </div>
+            </header>
+
+            {/* Hero Section */}
+            <main className="pt-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+                    <div className="text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-6">
+                            <Sparkles size={16} />
+                            AI-Powered Data Analysis
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-black text-[#232f3e] mb-6 leading-tight">
+                            Transform Data into
+                            <br />
+                            <span className="text-[#ff9900]">Actionable Insights</span>
+                        </h1>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+                            AutoEDA Studio automates exploratory data analysis with powerful visualizations, 
+                            statistical summaries, and AI-generated insights. Upload your dataset and get professional 
+                            analysis reports in minutes.
+                        </p>
+                        
+                        {!isAuthenticated && (
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                <button
+                                    onClick={() => navigate('/signup')}
+                                    className="group px-8 py-4 bg-[#ff9900] text-white rounded-lg font-bold text-lg hover:bg-[#e68a00] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2"
+                                >
+                                    Start Analyzing for Free
+                                    <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+                                </button>
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="px-8 py-4 bg-white text-gray-900 border-2 border-gray-300 rounded-lg font-bold text-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
+                                >
+                                    Sign In
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={18} className="text-green-600" />
+                                <span>No credit card required</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={18} className="text-green-600" />
+                                <span>Free tier available</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={18} className="text-green-600" />
+                                <span>Setup in 60 seconds</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {features.map((feature, index) => {
+                            const Icon = feature.icon;
+                            return (
+                                <div
+                                    key={index}
+                                    className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow border border-gray-100"
+                                >
+                                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                                        <Icon className="text-[#ff9900]" size={24} />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
+                                    <p className="text-gray-600 text-sm">{feature.description}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* How It Works */}
+                    <div className="mt-24 text-center">
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#232f3e] mb-12">
+                            How It Works
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                            <div className="relative">
+                                <div className="w-16 h-16 bg-[#ff9900] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                                    1
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Upload Dataset</h3>
+                                <p className="text-gray-600">
+                                    Upload your CSV, Excel, or JSON file. Support for files up to 50MB.
+                                </p>
+                            </div>
+                            <div className="relative">
+                                <div className="w-16 h-16 bg-[#ff9900] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                                    2
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">AI Analysis</h3>
+                                <p className="text-gray-600">
+                                    Our AI engine analyzes your data, generates visualizations, and detects patterns.
+                                </p>
+                            </div>
+                            <div className="relative">
+                                <div className="w-16 h-16 bg-[#ff9900] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                                    3
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Get Insights</h3>
+                                <p className="text-gray-600">
+                                    Receive comprehensive reports with charts, statistics, and actionable insights.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CTA Section */}
+                    {!isAuthenticated && (
+                        <div className="mt-24 bg-gradient-to-r from-[#232f3e] to-[#37475a] rounded-2xl p-12 text-center text-white shadow-2xl">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                                Ready to unlock your data's potential?
+                            </h2>
+                            <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+                                Join thousands of data professionals who trust AutoEDA Studio for their analysis needs.
+                            </p>
+                            <button
+                                onClick={() => navigate('/signup')}
+                                className="px-8 py-4 bg-[#ff9900] text-white rounded-lg font-bold text-lg hover:bg-[#e68a00] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                            >
+                                Start Your Free Trial
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </main>
+
+            {/* Footer */}
+            <footer className="border-t border-gray-200 bg-white mt-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <BarChart3 className="h-6 w-6 text-[#ff9900]" />
+                            <span className="font-bold text-gray-900">AutoEDA Studio</span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                            &copy; 2025 AutoEDA Studio. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };

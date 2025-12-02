@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { BarChart3 } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
 const Signup = () => {
@@ -11,6 +12,7 @@ const Signup = () => {
         password: '',
         confirmPassword: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { signup, error, clearError, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
@@ -77,6 +79,8 @@ const Signup = () => {
 
         if (!validateForm()) return;
 
+        setIsSubmitting(true);
+
         try {
             await signup({
                 username: formData.username.trim(),
@@ -88,83 +92,68 @@ const Signup = () => {
             navigate('/dashboard');
         } catch (error) {
             toast.error(error.response?.data?.error || 'Signup failed');
+        } finally {
+            setIsSubmitting(false);
         }
     };
+
     return (
-        <div style={{ backgroundColor: 'var(--background-light)', fontFamily: 'Inter, sans-serif', width: '100%', minHeight: '100vh', margin: 0, padding: 0, overflowX: 'hidden' }}>
-            <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '100%', maxWidth: '28rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <div>
-                        <svg
-                            style={{ margin: '0 auto', height: '3rem', width: 'auto', color: 'var(--primary-color)' }}
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-                            <path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222 4 2.222V20M1 12v7a2 2 0 002 2h18a2 2 0 002-2v-7" strokeLinecap="round" strokeLinejoin="round"></path>
-                        </svg>
-                        <h2 style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '1.875rem', fontWeight: '700', lineHeight: '2.25rem', letterSpacing: '-0.025em', color: '#111827' }}>
-                            Create your account
-                        </h2>
-                        <p style={{ marginTop: '0.5rem', textAlign: 'center', fontSize: '0.875rem', color: '#4b5563' }}>
-                            to start analyzing your data
-                        </p>
-                    </div>
-                    <form onSubmit={handleSubmit} style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <input name="remember" type="hidden" value="true" />
-                        <div style={{ borderRadius: '0.375rem', boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)' }}>
+        <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-blue-50 to-orange-50">
+            <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+                <div className="w-full max-w-md space-y-8">
+                    {/* Home Link */}
+                    <Link to="/" className="inline-flex items-center text-sm text-gray-600 hover:text-[#ff9900] transition-colors mb-4">
+                        ← Back to Home
+                    </Link>
+                    
+                    <div className="flex flex-col gap-8">
+                        <div className="text-center">
+                            <BarChart3 className="mx-auto h-12 w-auto text-[#ff9900] mb-4" />
+                            <h2 className="text-3xl font-bold text-[#232f3e]">
+                                Create your account
+                            </h2>
+                            <p className="mt-2 text-sm text-gray-600">
+                                Start analyzing your data with powerful insights
+                            </p>
+                        </div>
+                        
+                        <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                             <div>
-                                <label className="sr-only" htmlFor="email-address">Email address</label>
+                                <label
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                    htmlFor="email"
+                                >
+                                    Email Address *
+                                </label>
                                 <input
                                     autoComplete="email"
-                                    style={{
-                                        position: 'relative',
-                                        display: 'block',
-                                        width: '100%',
-                                        appearance: 'none',
-                                        borderRadius: '0.375rem 0.375rem 0 0',
-                                        border: '1px solid #d1d5db',
-                                        padding: '0.5rem 0.75rem',
-                                        color: '#111827',
-                                        fontSize: '0.875rem'
-                                    }}
-                                    id="email-address"
+                                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:ring-[#ff9900] focus:outline-none transition-colors"
+                                    id="email"
                                     name="email"
                                     placeholder="Email address"
                                     required
                                     type="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    onFocus={(e) => {
-                                        e.target.style.zIndex = '10';
-                                        e.target.style.borderColor = 'var(--primary-color)';
-                                        e.target.style.outline = 'none';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d1d5db';
-                                    }}
                                 />
                             </div>
                             <div>
-                                <label className="sr-only" htmlFor="username">Username</label>
+                                <label
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                    htmlFor="username"
+                                >
+                                    Username *
+                                </label>
                                 <input
                                     autoComplete="username"
-                                    style={{
-                                        position: 'relative',
-                                        display: 'block',
-                                        width: '100%',
-                                        appearance: 'none',
-                                        borderRadius: '0',
-                                        border: '1px solid #d1d5db',
-                                        borderTop: 'none',
-                                        padding: '0.5rem 0.75rem',
-                                        color: '#111827',
-                                        fontSize: '0.875rem'
-                                    }}
+                                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:ring-[#ff9900] focus:outline-none transition-colors"
                                     id="username"
                                     name="username"
                                     placeholder="Username"
@@ -172,32 +161,18 @@ const Signup = () => {
                                     type="text"
                                     value={formData.username}
                                     onChange={handleInputChange}
-                                    onFocus={(e) => {
-                                        e.target.style.zIndex = '10';
-                                        e.target.style.borderColor = 'var(--primary-color)';
-                                        e.target.style.outline = 'none';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d1d5db';
-                                    }}
                                 />
                             </div>
                             <div>
-                                <label className="sr-only" htmlFor="password">Password</label>
+                                <label
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                    htmlFor="password"
+                                >
+                                    Password *
+                                </label>
                                 <input
                                     autoComplete="current-password"
-                                    style={{
-                                        position: 'relative',
-                                        display: 'block',
-                                        width: '100%',
-                                        appearance: 'none',
-                                        borderRadius: '0',
-                                        border: '1px solid #d1d5db',
-                                        borderTop: 'none',
-                                        padding: '0.5rem 0.75rem',
-                                        color: '#111827',
-                                        fontSize: '0.875rem'
-                                    }}
+                                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:ring-[#ff9900] focus:outline-none transition-colors"
                                     id="password"
                                     name="password"
                                     placeholder="Password"
@@ -205,32 +180,18 @@ const Signup = () => {
                                     type="password"
                                     value={formData.password}
                                     onChange={handleInputChange}
-                                    onFocus={(e) => {
-                                        e.target.style.zIndex = '10';
-                                        e.target.style.borderColor = 'var(--primary-color)';
-                                        e.target.style.outline = 'none';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d1d5db';
-                                    }}
                                 />
                             </div>
                             <div>
-                                <label className="sr-only" htmlFor="confirmPassword">Confirm Password</label>
+                                <label
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                    htmlFor="confirmPassword"
+                                >
+                                    Confirm Password *
+                                </label>
                                 <input
                                     autoComplete="current-password"
-                                    style={{
-                                        position: 'relative',
-                                        display: 'block',
-                                        width: '100%',
-                                        appearance: 'none',
-                                        borderRadius: '0 0 0.375rem 0.375rem',
-                                        border: '1px solid #d1d5db',
-                                        borderTop: 'none',
-                                        padding: '0.5rem 0.75rem',
-                                        color: '#111827',
-                                        fontSize: '0.875rem'
-                                    }}
+                                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#ff9900] focus:ring-[#ff9900] focus:outline-none transition-colors"
                                     id="confirmPassword"
                                     name="confirmPassword"
                                     placeholder="Confirm Password"
@@ -238,57 +199,35 @@ const Signup = () => {
                                     type="password"
                                     value={formData.confirmPassword}
                                     onChange={handleInputChange}
-                                    onFocus={(e) => {
-                                        e.target.style.zIndex = '10';
-                                        e.target.style.borderColor = 'var(--primary-color)';
-                                        e.target.style.outline = 'none';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = '#d1d5db';
-                                    }}
                                 />
                             </div>
+                            <div>
+                                <button
+                                    disabled={isSubmitting}
+                                    className="w-full flex justify-center items-center bg-[#ff9900] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#e68a00] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-md"
+                                    type="submit"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <LoadingSpinner size="sm" text="" />
+                                            <span className="ml-2">Creating Account...</span>
+                                        </>
+                                    ) : (
+                                        'Sign Up'
+                                    )}
+                                </button>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-sm text-gray-600">
+                                    Already have an account?{' '}
+                                    <Link to="/login" className="text-[#007185] font-semibold hover:text-[#005a6c] hover:underline">
+                                        Sign in
+                                    </Link>
+                                </p>
+                            </div>
+                        </form>
                         </div>
-                        <div>
-                            <button
-                                style={{
-                                    position: 'relative',
-                                    display: 'flex',
-                                    width: '100%',
-                                    justifyContent: 'center',
-                                    borderRadius: '0.375rem',
-                                    border: 'none',
-                                    backgroundColor: 'var(--primary-color)',
-                                    padding: '0.5rem 1rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500',
-                                    color: '#ffffff',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 150ms'
-                                }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = 'var(--primary-color)'}
-                                onFocus={(e) => {
-                                    e.target.style.outline = 'none';
-                                    e.target.style.boxShadow = '0 0 0 2px var(--primary-color)';
-                                }}
-                                onBlur={(e) => {
-                                    e.target.style.boxShadow = 'none';
-                                }}
-                                type="submit"
-                            >
-                                Sign Up
-                            </button>
-                        </div>
-                        <div style={{ fontSize: '0.875rem', textAlign: 'center' }}>
-                            <p style={{ color: '#6b7280' }}>
-                                Already have an account?{' '}
-                                <Link to="/login" style={{ color: 'var(--primary-color)', fontWeight: '500', textDecoration: 'none' }}>
-                                    Sign in
-                                </Link>
-                            </p>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

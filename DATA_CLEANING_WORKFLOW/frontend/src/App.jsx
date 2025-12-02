@@ -4,11 +4,13 @@ import { Toaster } from 'react-hot-toast';
 import Welcome from './components/Welcome';
 import Login from './components/Login';
 import Signup from './components/Signup';
-import Dashboard from './components/Dashboard';
+import DashboardNew from './components/DashboardNew';
 import AnalysisHistory from './components/AnalysisHistory';
 import AnalysisReport from './components/AnalysisReport';
+import UserProfileNew from './components/UserProfileNew';
 import Settings from './components/Settings';
 import LoadingSpinner from './components/LoadingSpinner';
+import AmazonLayout from './components/AmazonLayout';
 import './App.css';
 
 // Protected Route Component
@@ -19,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return isAuthenticated ? <AmazonLayout>{children}</AmazonLayout> : <Navigate to="/login" replace />;
 };
 
 // Public Route Component (redirect to dashboard if already authenticated)
@@ -58,7 +60,7 @@ function AppRoutes() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardNew />
             </ProtectedRoute>
           }
         />
@@ -79,6 +81,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfileNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/settings"
           element={
             <ProtectedRoute>
@@ -93,8 +103,23 @@ function AppRoutes() {
         toastOptions={{
           duration: 4000,
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: '#ffffff',
+            color: '#0f1111',
+            border: '1px solid #d5dbdb',
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.08)',
+            fontSize: '14px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#067d62',
+              secondary: '#ffffff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#d13212',
+              secondary: '#ffffff',
+            },
           },
         }}
       />

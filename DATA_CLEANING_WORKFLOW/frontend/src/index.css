@@ -805,7 +805,7 @@ body {
 }
 
 /* Material Symbols */
-.material-symbols-outlined {
+/* .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
@@ -820,7 +820,7 @@ body {
   -webkit-font-feature-settings: 'liga';
   font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
-}
+} */
 
 /* Form styles */
 input,

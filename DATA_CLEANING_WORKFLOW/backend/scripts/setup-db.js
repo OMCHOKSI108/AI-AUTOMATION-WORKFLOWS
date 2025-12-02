@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { createTables } = require('../migrations/createTables');
 
 async function setupDatabase() {

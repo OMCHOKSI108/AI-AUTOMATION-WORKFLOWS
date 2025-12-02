@@ -18,42 +18,21 @@ docker-compose up -d
 ```
 
 3. Open the editor at: http://localhost:5678
+## Documentation Moved
 
-Notes:
-- This compose file uses a persisted `./n8n` folder for n8n data.
-- Basic auth is enabled by default in `.env.example`.
+All markdown documentation has been relocated to the `docs/` directory for organization.
 
-## Quick start — single Docker container (Windows PowerShell)
+### Quick Links
+- Main index: `docs/index.md`
+- Updated overview: `docs/DATA_CLEANING_WORKFLOW/README_new.md`
+- Production details: `docs/DATA_CLEANING_WORKFLOW/README_PRODUCTION.md`
+- Quick start: `docs/DATA_CLEANING_WORKFLOW/QUICKSTART.md`
+- API endpoints: `docs/api_endpoints.txt`
 
-Run a standalone container (good for quick tests):
+### Legacy Blueprint
+Previous architecture blueprint retained at `docs/README_ROOT_LEGACY.md`.
 
-```powershell
-# create a local folder for persistence if you want
-New-Item -Path . -Name "n8n" -ItemType Directory -Force
-docker run -it --rm -p 5678:5678 -v ${PWD}\n8n:/home/node/.n8n `
-	-e N8N_BASIC_AUTH_ACTIVE=true `
-	-e N8N_BASIC_AUTH_USER=admin `
-	-e N8N_BASIC_AUTH_PASSWORD=changeme `
-	n8nio/n8n:latest
+### Next Actions
+Consider merging duplicate READMEs and converting `api_endpoints.txt` to richer markdown.
 ```
-
-Open http://localhost:5678 and sign in with the credentials from the command.
-
-## Importing the project's workflow
-When a `workflow.json` file is present in this repository you can:
-
-- In the n8n editor go to 'Import' and paste the JSON, or
-- Use the 'Import from file' option and choose the workflow JSON.
-
-## Recommended hosting for the demo video
-GitHub READMEs don't reliably play MP4 inline. For a better user experience:
-
-- Upload `src/food_delivery_automation.mp4` to YouTube and use a thumbnail link in the README.
-- Or convert a short clip to an animated GIF (small, embedded preview).
-
-See the converted-example and commands in the repo README if you need GIF conversion help.
-
-## Files added
-- `docker-compose.yml` — quick Docker Compose for n8n
-- `.env.example` — example environment variables for n8n
 

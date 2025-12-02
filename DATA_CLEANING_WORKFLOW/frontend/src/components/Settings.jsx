@@ -1,148 +1,297 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { userAPI } from '../services/api';
+import toast from 'react-hot-toast';
+import { User, Mail, Lock, Bell, Globe, Palette, Save } from 'lucide-react';
+import Card from './common/Card';
+import LoadingSpinner from './LoadingSpinner';
 
 const Settings = () => {
-    const navigate = useNavigate();
-    const { user, logout } = useAuth();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { user } = useAuth();
+    const [saving, setSaving] = useState(false);
+    
+    // Profile Settings
+    const [profileData, setProfileData] = useState({
+        username: user?.username || '',
+        email: user?.email || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
 
-    const [emailNotifications, setEmailNotifications] = useState(true);
-    const [pushNotifications, setPushNotifications] = useState(true);
-    const [inAppNotifications, setInAppNotifications] = useState(false);
+    // Notification Settings
+    const [notifications, setNotifications] = useState({
+        email: true,
+        push: true,
+        inApp: false
+    });
+
+    // Preferences
+    const [preferences, setPreferences] = useState({
+        language: 'English',
+        theme: 'Light'
+    });
+
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            // Add API call here when ready
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            toast.success('Profile updated successfully');
+        } catch (error) {
+            toast.error('Failed to update profile');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleNotificationUpdate = async () => {
+        setSaving(true);
+        try {
+            await userAPI.updatePreferences({ notifications });
+            toast.success('Notification preferences updated');
+        } catch (error) {
+            toast.error('Failed to update notifications');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handlePreferencesUpdate = async () => {
+        setSaving(true);
+        try {
+            await userAPI.updatePreferences(preferences);
+            toast.success('Preferences updated successfully');
+        } catch (error) {
+            toast.error('Failed to update preferences');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
-        <div className="text-black" style={{ fontFamily: 'Inter, sans-serif', width: '100%', margin: 0, padding: 0, backgroundColor: '#f6f7f8', overflowX: 'hidden', height: '100vh' }}>
-            <div className="flex h-full" style={{ width: '100%', margin: 0 }}>
-                <aside className={`flex w-64 md:w-80 bg-white border-r flex-col fixed md:relative z-50 h-full transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`} style={{ borderColor: '#e2e8f0' }}>
-                    <div className="p-6 flex items-center gap-3">
-                        <div className="bg-blue-600 text-white rounded-full size-10 flex items-center justify-center font-bold text-lg">
-                            {user?.username?.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold">SANS EDA</h1>
-                            <p className="text-sm text-gray-600">{user?.username}</p>
-                        </div>
+        <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
+            <div className="max-w-5xl mx-auto">
+                <h1 className="text-3xl font-bold text-[#232f3e]">Settings</h1>
+                <p className="mt-2 text-gray-600">Manage your account settings and preferences</p>
+            </div>
+            <div className="max-w-5xl mx-auto space-y-6">
+            {/* Profile Section */}
+            <Card title="Profile Information" icon={User}>
+                <form onSubmit={handleProfileUpdate} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <User size={16} className="inline mr-2" />
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            value={profileData.username}
+                            onChange={(e) => setProfileData({...profileData, username: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
                     </div>
-                    <nav className="flex-1 px-4 py-2 space-y-2">
-                        <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">upload_file</span>
-                            <span>Upload</span>
-                        </Link>
-                        <Link to="/analysis-history" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">history</span>
-                            <span>History</span>
-                        </Link>
-                        <Link to="/analysis-report" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">assessment</span>
-                            <span>Reports</span>
-                        </Link>
-                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black bg-blue-50 text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">settings</span>
-                            <span>Settings</span>
-                        </Link>
-                    </nav>
-                    <div className="p-4 mt-auto">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <Mail size={16} className="inline mr-2" />
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            value={profileData.email}
+                            onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div className="pt-4">
                         <button
-                            onClick={() => navigate('/dashboard')}
-                            className="w-full text-white font-bold py-2 px-4 rounded-lg"
-                            style={{ backgroundColor: '#1173d4', cursor: 'pointer' }}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#0e5bb5'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#1173d4'}
+                            type="submit"
+                            disabled={saving}
+                            className="inline-flex items-center px-6 py-3 bg-[#ff9900] text-white font-semibold rounded-lg shadow-md hover:bg-[#e68a00] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            New Analysis
+                            {saving ? (
+                                <>
+                                    <LoadingSpinner size="sm" />
+                                    <span className="ml-2">Saving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={18} className="mr-2" />
+                                    Save Profile
+                                </>
+                            )}
                         </button>
+                    </div>
+                </form>
+            </Card>
+
+            {/* Password Section */}
+            <Card title="Change Password" icon={Lock}>
+                <form className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Current Password
+                        </label>
+                        <input
+                            type="password"
+                            value={profileData.currentPassword}
+                            onChange={(e) => setProfileData({...profileData, currentPassword: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            New Password
+                        </label>
+                        <input
+                            type="password"
+                            value={profileData.newPassword}
+                            onChange={(e) => setProfileData({...profileData, newPassword: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Confirm New Password
+                        </label>
+                        <input
+                            type="password"
+                            value={profileData.confirmPassword}
+                            onChange={(e) => setProfileData({...profileData, confirmPassword: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div className="pt-4">
                         <button
-                            onClick={() => logout()}
-                            className="flex items-center gap-3 px-4 py-2 mt-4 rounded-lg text-black w-full text-left"
-                            style={{ cursor: 'pointer' }}
+                            type="button"
+                            disabled={saving}
+                            className="inline-flex items-center px-6 py-3 bg-[#ff9900] text-white font-semibold rounded-lg shadow-md hover:bg-[#e68a00] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            <span className="material-symbols-outlined">logout</span>
-                            <span>Logout</span>
+                            {saving ? (
+                                <>
+                                    <LoadingSpinner size="sm" />
+                                    <span className="ml-2">Updating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Lock size={18} className="mr-2" />
+                                    Update Password
+                                </>
+                            )}
                         </button>
                     </div>
-                </aside>
-                {isMobileMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}></div>}
-                <main className="flex-1 h-full p-4 md:p-8 overflow-y-auto">
-                    <div className="md:hidden flex items-center justify-between mb-4">
+                </form>
+            </Card>
+
+            {/* Notifications Section */}
+            <Card title="Notification Preferences" icon={Bell}>
+                <div className="space-y-4">
+                    <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                        <span className="text-sm font-medium text-gray-700">Email Notifications</span>
+                        <input
+                            type="checkbox"
+                            checked={notifications.email}
+                            onChange={(e) => setNotifications({...notifications, email: e.target.checked})}
+                            className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                    </label>
+                    <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                        <span className="text-sm font-medium text-gray-700">Push Notifications</span>
+                        <input
+                            type="checkbox"
+                            checked={notifications.push}
+                            onChange={(e) => setNotifications({...notifications, push: e.target.checked})}
+                            className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                    </label>
+                    <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                        <span className="text-sm font-medium text-gray-700">In-App Notifications</span>
+                        <input
+                            type="checkbox"
+                            checked={notifications.inApp}
+                            onChange={(e) => setNotifications({...notifications, inApp: e.target.checked})}
+                            className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                    </label>
+                    <div className="pt-4">
                         <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+                            onClick={handleNotificationUpdate}
+                            type="button"
+                            disabled={saving}
+                            className="inline-flex items-center px-6 py-3 bg-[#ff9900] text-white font-semibold rounded-lg shadow-md hover:bg-[#e68a00] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            <span className="material-symbols-outlined">menu</span>
+                            {saving ? (
+                                <>
+                                    <LoadingSpinner size="sm" />
+                                    <span className="ml-2">Saving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={18} className="mr-2" />
+                                    Save Notifications
+                                </>
+                            )}
                         </button>
-                        <h1 className="text-xl font-bold">Settings</h1>
                     </div>
-                    <div className="hidden md:block">
-                        <h1 className="text-3xl font-bold mb-8">Settings</h1>
+                </div>
+            </Card>
+
+            {/* Preferences Section */}
+            <Card title="App Preferences" icon={Palette}>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <Globe size={16} className="inline mr-2" />
+                            Language
+                        </label>
+                        <select
+                            value={preferences.language}
+                            onChange={(e) => setPreferences({...preferences, language: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option>English</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                        </select>
                     </div>
-                    <div className="space-y-12">
-                        <section>
-                            <h2 className="text-2xl font-bold mb-6">Profile</h2>
-                            <div className="max-w-full md:max-w-xl space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" htmlFor="name">Name</label>
-                                    <input className="w-full p-3 rounded-lg border border-blue-600/20 bg-gray-50 focus:ring-blue-600 focus:border-blue-600" id="name" type="text" defaultValue={user?.username} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" htmlFor="email">Email</label>
-                                    <input className="w-full p-3 rounded-lg border border-blue-600/20 bg-gray-50 focus:ring-blue-600 focus:border-blue-600" id="email" type="email" defaultValue={user?.email} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" htmlFor="password">Password</label>
-                                    <input className="w-full p-3 rounded-lg border border-blue-600/20 bg-gray-50 focus:ring-blue-600 focus:border-blue-600" id="password" type="password" />
-                                </div>
-                                <div>
-                                    <button className="text-white font-bold py-2 px-4 rounded-lg" style={{ backgroundColor: '#1173d4' }}>Update Profile</button>
-                                </div>
-                            </div>
-                        </section>
-                        <section>
-                            <h2 className="text-2xl font-bold mb-6">Notifications</h2>
-                            <div className="max-w-full md:max-w-xl space-y-4">
-                                <label className="flex items-center">
-                                    <input checked={emailNotifications} onChange={(e) => setEmailNotifications(e.target.checked)} className="form-checkbox h-5 w-5 text-blue-600 rounded border-blue-600/40 bg-gray-50 focus:ring-blue-600" type="checkbox" />
-                                    <span className="ml-3">Email notifications</span>
-                                </label>
-                                <label className="flex items-center">
-                                    <input checked={pushNotifications} onChange={(e) => setPushNotifications(e.target.checked)} className="form-checkbox h-5 w-5 text-blue-600 rounded border-blue-600/40 bg-gray-50 focus:ring-blue-600" type="checkbox" />
-                                    <span className="ml-3">Push notifications</span>
-                                </label>
-                                <label className="flex items-center">
-                                    <input checked={inAppNotifications} onChange={(e) => setInAppNotifications(e.target.checked)} className="form-checkbox h-5 w-5 text-blue-600 rounded border-blue-600/40 bg-gray-50 focus:ring-blue-600" type="checkbox" />
-                                    <span className="ml-3">In-app notifications</span>
-                                </label>
-                                <div>
-                                    <button className="text-white font-bold py-2 px-4 rounded-lg mt-2" style={{ backgroundColor: '#1173d4' }}>Update Notifications</button>
-                                </div>
-                            </div>
-                        </section>
-                        <section>
-                            <h2 className="text-2xl font-bold mb-6">Preferences</h2>
-                            <div className="max-w-full md:max-w-xl space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" htmlFor="language">Language</label>
-                                    <select className="w-full p-3 rounded-lg border border-blue-600/20 bg-gray-50 focus:ring-blue-600 focus:border-blue-600" id="language">
-                                        <option>English</option>
-                                        <option>Spanish</option>
-                                        <option>French</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2" htmlFor="theme">Theme</label>
-                                    <select className="w-full p-3 rounded-lg border border-blue-600/20 bg-gray-50 focus:ring-blue-600 focus:border-blue-600" id="theme">
-                                        <option>Light</option>
-                                        <option>Dark</option>
-                                        <option>System</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <button className="text-white font-bold py-2 px-4 rounded-lg" style={{ backgroundColor: '#1173d4' }}>Update Preferences</button>
-                                </div>
-                            </div>
-                        </section>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <Palette size={16} className="inline mr-2" />
+                            Theme
+                        </label>
+                        <select
+                            value={preferences.theme}
+                            onChange={(e) => setPreferences({...preferences, theme: e.target.value})}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option>Light</option>
+                            <option>Dark</option>
+                            <option>System</option>
+                        </select>
                     </div>
-                </main>
+                    <div className="pt-4">
+                        <button
+                            onClick={handlePreferencesUpdate}
+                            type="button"
+                            disabled={saving}
+                            className="inline-flex items-center px-6 py-3 bg-[#ff9900] text-white font-semibold rounded-lg shadow-md hover:bg-[#e68a00] hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            {saving ? (
+                                <>
+                                    <LoadingSpinner size="sm" />
+                                    <span className="ml-2">Saving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={18} className="mr-2" />
+                                    Save Preferences
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Card>
             </div>
         </div>
     );

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANS EDA - File Upload Test</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0f1111;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #565959;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .upload-area {
+            border: 2px dashed #d5dbdb;
+            border-radius: 12px;
+            padding: 40px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            border-color: #007185;
+            background: #f1f3f4;
+        }
+
+        .upload-area.dragover {
+            border-color: #007185;
+            background: #e6f4f9;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #007185;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #0f1111;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: #565959;
+            font-size: 14px;
+        }
+
+        .selected-file {
+            margin-top: 16px;
+            padding: 12px;
+            background: #e6f4f9;
+            border-radius: 8px;
+            color: #007185;
+            font-weight: 500;
+        }
+
+        .btn {
+            background: #007185;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #005a6c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 113, 133, 0.3);
+        }
+
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007185;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #e6f4f1;
+            border: 1px solid #067d62;
+            color: #067d62;
+        }
+
+        .result.error {
+            background: #fef2f2;
+            border: 1px solid #d13212;
+            color: #d13212;
+        }
+
+        .result pre {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: left;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">SANS <span style="color: #007185;">EDA</span></div>
+        <div class="subtitle">Upload your data file for automated analysis</div>
+
+        <form id="uploadForm">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📊</div>
+                <div class="upload-text">Drop your Excel file here</div>
+                <div class="upload-subtext">or click to browse</div>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv">
+            </div>
+
+            <div id="selectedFile" class="selected-file" style="display: none;"></div>
+
+            <button type="submit" id="submitBtn" class="btn" disabled>
+                Analyze Data
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div style="margin-top: 16px; color: #565959;">Processing your data...</div>
+        </div>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectedFile = document.getElementById('selectedFile');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            // Validate file type
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+                showResult('Please select a valid Excel (.xlsx, .xls) or CSV file.', 'error');
+                return;
+            }
+
+            // Show selected file
+            selectedFile.textContent = `📄 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            selectedFile.style.display = 'block';
+
+            // Enable submit button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Analyze Data';
+
+            // Hide any previous results
+            result.style.display = 'none';
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = fileInput.files[0];
+            if (!file) {
+                showResult('Please select a file first.', 'error');
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            try {
+                // Generate unique report ID
+                const reportId = `web-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+                // Prepare data for n8n webhook
+                const webhookData = {
+                    reportId: reportId,
+                    filename: file.name,
+                    filepath: `D:\\OM\\AI-AUTOMATION-WORKFLOWS\\DATA_CLEANING_WORKFLOW\\frontend\\${file.name}`,
+                    originalFilename: file.name
+                };
+
+                console.log('Sending data to n8n:', webhookData);
+
+                // Send to n8n webhook
+                const response = await fetch('http://localhost:5678/webhook/start-analysis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(webhookData)
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    showResult(`✅ Analysis started successfully!<br><strong>Report ID:</strong> ${reportId}<br><br>The workflow is now processing your data. Check the n8n interface for progress.`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${responseData.message || 'Unknown error'}`);
+                }
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                showResult(`❌ Upload failed: ${error.message}`, 'error');
+            } finally {
+                // Hide loading
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Analyze Data';
+            }
+        });
+
+        function showResult(message, type) {
+            result.className = `result ${type}`;
+            result.innerHTML = message;
+            result.style.display = 'block';
+
+            // Scroll to result
+            result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Check if n8n is running
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('http://localhost:5678/healthz');
+                if (!response.ok) {
+                    console.warn('n8n health check failed, but continuing...');
+                }
+            } catch (error) {
+                console.warn('Could not check n8n status:', error);
+            }
+        });
+    </script>
+</body>
+</html>

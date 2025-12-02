@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      PORT: 3001
+      # Use db service name to access Postgres container
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: sans
+      DB_NAME: SANS
+      DB_PORT: 5432
+      JWT_SECRET: your_super_secret_jwt_key_change_this_in_production
+      # Frontend URL for CORS (browser access)
+      FRONTEND_URL: http://localhost:5173
+      # n8n Webhook URL (internal Docker network)
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/start-analysis
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    volumes:
+      # Shared uploads folder
+      - ./backend/uploads:/app/uploads
+      # Shared scripts folder (so you can edit scripts locally)
+      - ./backend/scripts:/app/scripts
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3001
+    environment:
+      # Browser needs to access backend via localhost
+      VITE_API_URL: http://localhost:3001
+    ports:
+      - "5173:5173"
+    # Use serve for production-like stability
+    command: serve -s dist -l 5173
+
+  n8n:
+    build:
+      context: ..
+      dockerfile: ./DATA_CLEANING_WORKFLOW/n8n/Dockerfile
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: admin
+      N8N_BASIC_AUTH_PASSWORD: admin
+      # n8n talks to backend via internal Docker name
+      BACKEND_URL: http://backend:3001
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      NODE_FUNCTION_ALLOW_BUILTIN: "*"
+      NODE_FUNCTION_ALLOW_EXTERNAL: "*"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "false"
+    volumes:
+      # Shared uploads folder (Read-Only for n8n is safer, but RW is fine)
+      - ./backend/uploads:/app/uploads
+      # Shared scripts folder
+      - ./backend/scripts:/home/node/scripts
+      - n8n_data:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    depends_on:
+      - backend
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sans
+      POSTGRES_DB: SANS
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/setup-database.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5435:5432"
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
+  postgres_data:

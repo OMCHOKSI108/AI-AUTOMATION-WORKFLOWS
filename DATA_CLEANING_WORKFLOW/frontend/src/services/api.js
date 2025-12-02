@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Create axios instance
 const api = axios.create({
@@ -103,6 +103,43 @@ export const dataAPI = {
 
     getReport: async (reportId) => {
         const response = await api.get(`/api/data/reports/${reportId}`);
+        return response.data;
+    },
+
+    downloadCleanedData: async (reportId) => {
+        const response = await api.get(`/api/data/download/${reportId}`, {
+            responseType: 'blob', // Important for file downloads
+        });
+        return response;
+    },
+
+    downloadPDF: async (reportId) => {
+        const response = await api.get(`/api/data/download-pdf/${reportId}`, {
+            responseType: 'blob', // Important for PDF downloads
+        });
+        return response;
+    }
+};
+
+// User API
+export const userAPI = {
+    getProfile: async () => {
+        const response = await api.get('/api/users/profile');
+        return response.data;
+    },
+
+    updateProfile: async (data) => {
+        const response = await api.put('/api/users/profile', data);
+        return response.data;
+    },
+
+    getPreferences: async () => {
+        const response = await api.get('/api/users/preferences');
+        return response.data;
+    },
+
+    updatePreferences: async (data) => {
+        const response = await api.put('/api/users/preferences', data);
         return response.data;
     }
 };

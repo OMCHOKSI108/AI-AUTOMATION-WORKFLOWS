@@ -1,0 +1,198 @@
+{
+  "name": "SANS EDA - Complete Data Cleaning & Analysis Workflow (Perfect Fixed)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "start-analysis",
+        "options": {}
+      },
+      "id": "8f8371a7-8af5-4e0b-b1f9-7df7fab4894c",
+      "name": "Webhook Trigger - File Upload",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [400, 200],
+      "webhookId": "start-analysis"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || {};\nconst reportId = body.reportId;\nconst filename = body.filename || body.originalFilename;\n\nif (!reportId || !filename) {\n  throw new Error('Missing reportId or filename');\n}\n\n// Force container path for n8n\nconst containerPath = `/app/uploads/${filename}`;\n\nreturn [{ json: { reportId, filepath: containerPath, filename, originalFilename: body.originalFilename, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "0607b4b1-53e7-41fb-9b40-73769d175ddf",
+      "name": "Validate Input Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { execSync } = require('child_process');\nconst inputData = $('Validate Input Data').first().json;\nconst filepath = inputData.filepath;\nconst reportId = inputData.reportId;\n\n// Construct command\nconst cmd = `python3 /home/node/scripts/profile_data.py \"${filepath}\" \"${reportId}\"`;\n\ntry {\n  const stdout = execSync(cmd, { encoding: 'utf8' });\n  let result = {};\n  try { result = JSON.parse(stdout); } catch(e) { result = { raw: stdout }; }\n  return [{ json: { profiling_complete: true, profiling_result: result, processed_file: filepath, reportId } }];\n} catch (error) {\n  throw new Error(`Profile script failed: ${error.message}`);\n}"
+      },
+      "id": "profile-node",
+      "name": "Run Profile Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [800, 200]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL || \"http://backend:3001\" }}/api/internal/update-report",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"reportId\": $json.reportId, \"status\": \"processing\", \"resultType\": \"summary\", \"content\": $json.profiling_result } }}"
+      },
+      "id": "975541fe-8df7-4bb5-bec7-e29fb19609a2",
+      "name": "Save Profile to Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { execSync } = require('child_process');\nconst inputData = $('Validate Input Data').first().json;\nconst filepath = inputData.filepath;\nconst reportId = inputData.reportId;\n\nconst cmd = `python3 /home/node/scripts/clean_data.py \"${filepath}\" \"${reportId}\"`;\n\ntry {\n  const stdout = execSync(cmd, { encoding: 'utf8' });\n  let result = {};\n  try { result = JSON.parse(stdout); } catch(e) { result = { raw: stdout }; }\n  return [{ json: { cleaning_complete: true, cleaning_result: result, processed_file: filepath, reportId } }];\n} catch (error) {\n  throw new Error(`Clean script failed: ${error.message}`);\n}"
+      },
+      "id": "clean-node",
+      "name": "Run Clean Data Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 200]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL || \"http://backend:3001\" }}/api/internal/update-report",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"reportId\": $json.reportId, \"status\": \"processing\", \"resultType\": \"cleaning\", \"content\": $json.cleaning_result } }}"
+      },
+      "id": "da03e1e5-3e9a-4a90-8171-f29ac868af7f",
+      "name": "Save Cleaning Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1400, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { execSync } = require('child_process');\nconst inputData = $('Validate Input Data').first().json;\nconst filepath = inputData.filepath;\nconst reportId = inputData.reportId;\n\nconst cmd = `python3 /home/node/scripts/generate_statistics.py \"${filepath}\" \"${reportId}\"`;\n\ntry {\n  const stdout = execSync(cmd, { encoding: 'utf8' });\n  let result = {};\n  try { result = JSON.parse(stdout); } catch(e) { result = { raw: stdout }; }\n  return [{ json: { stats_complete: true, stats_result: result, processed_file: filepath, reportId } }];\n} catch (error) {\n  throw new Error(`Stats script failed: ${error.message}`);\n}"
+      },
+      "id": "stats-node",
+      "name": "Run Generate Statistics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1600, 200]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL || \"http://backend:3001\" }}/api/internal/update-report",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"reportId\": $json.reportId, \"status\": \"processing\", \"resultType\": \"statistics\", \"content\": $json.stats_result } }}"
+      },
+      "id": "87b816db-42c6-4741-9b68-36e1b63d2ccb",
+      "name": "Save Statistics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1900, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// You can customize the prompt here later\nreturn [{ json: { ai_prompt_ready: true, reportId: $json.reportId } }];"
+      },
+      "id": "ef4fad4d-b6d9-4379-8ec1-3d9a59be398d",
+      "name": "Prepare AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2100, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [{ "name": "key", "value": "={{ $env.GEMINI_API_KEY }}" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"contents\": [{ \"parts\": [{ \"text\": \"You are an expert data analyst. Summarize the key insights from this EDA report for a business user. \\n\\nIMPORTANT: Format your response using proper Markdown.\\n- Use ## for main sections\\n- Use ### for subsections\\n- Use **bold** for key metrics\\n- Use bullet points for lists\\n- Use tables if appropriate\\n\\nProfiling: \" + JSON.stringify($('Run Profile Script').first().json.profiling_result) + \"\\nCleaning: \" + JSON.stringify($('Run Clean Data Script').first().json.cleaning_result) + \"\\nStatistics: \" + JSON.stringify((({visualizations, ...rest}) => rest)($('Run Generate Statistics').first().json.stats_result)) }] }] } }}"
+      },
+      "id": "b71c22f1-b46f-4115-9fe8-f5c845e4b201",
+      "name": "Generate AI Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2300, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const root = $input.item.json;\nconst candidates = root.candidates || (root.response && root.response.candidates);\nconst text = candidates ? candidates[0].content.parts[0].text : 'No insights generated.';\nconst reportId = $('Validate Input Data').first().json.reportId;\nreturn [{ json: { insights: text, reportId } }];"
+      },
+      "id": "45732012-1592-48b2-94ac-3e001c7935fb",
+      "name": "Parse AI Insights",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2500, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL || \"http://backend:3001\" }}/api/internal/update-report",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"reportId\": $json.reportId, \"status\": \"processing\", \"resultType\": \"insight\", \"content\": $json.insights } }}"
+      },
+      "id": "3288f3e9-e2c7-4dac-9464-db84d6d120bb",
+      "name": "Save AI Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2700, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL || \"http://backend:3001\" }}/api/internal/update-report",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"reportId\": $json.reportId, \"status\": \"completed\", \"progress\": 100 } }}"
+      },
+      "id": "a8923285-b67e-416d-a282-9b847cec0a0c",
+      "name": "Mark Report Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2900, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { success: true, message: \"Full EDA analysis completed successfully!\" } }];"
+      },
+      "id": "5b752d3c-076a-4b05-ae48-7f25401d96af",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3100, 200]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger - File Upload": { "main": [[{ "node": "Validate Input Data", "type": "main", "index": 0 }]] },
+    "Validate Input Data": { "main": [[{ "node": "Run Profile Script", "type": "main", "index": 0 }]] },
+    "Run Profile Script": { "main": [[{ "node": "Save Profile to Backend", "type": "main", "index": 0 }]] },
+    "Save Profile to Backend": { "main": [[{ "node": "Run Clean Data Script", "type": "main", "index": 0 }]] },
+    "Run Clean Data Script": { "main": [[{ "node": "Save Cleaning Report", "type": "main", "index": 0 }]] },
+    "Save Cleaning Report": { "main": [[{ "node": "Run Generate Statistics", "type": "main", "index": 0 }]] },
+    "Run Generate Statistics": { "main": [[{ "node": "Save Statistics", "type": "main", "index": 0 }]] },
+    "Save Statistics": { "main": [[{ "node": "Prepare AI Prompt", "type": "main", "index": 0 }]] },
+    "Prepare AI Prompt": { "main": [[{ "node": "Generate AI Insights", "type": "main", "index": 0 }]] },
+    "Generate AI Insights": { "main": [[{ "node": "Parse AI Insights", "type": "main", "index": 0 }]] },
+    "Parse AI Insights": { "main": [[{ "node": "Save AI Insights", "type": "main", "index": 0 }]] },
+    "Save AI Insights": { "main": [[{ "node": "Mark Report Complete", "type": "main", "index": 0 }]] },
+    "Mark Report Complete": { "main": [[{ "node": "Success Response", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "SANS_EDA_PERFECT_2025",
+  "tags": [{ "name": "eda" }, { "name": "fixed" }, { "name": "production-ready" }]
+}

@@ -30,7 +30,7 @@ const createTables = async () => {
         id SERIAL PRIMARY KEY,
         report_id VARCHAR(255) REFERENCES reports(id) ON DELETE CASCADE,
         result_type VARCHAR(50) NOT NULL,
-        content JSONB NOT NULL,
+        content TEXT NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);

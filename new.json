@@ -1,0 +1,217 @@
+{
+  "name": "Data Cleaning & EDA Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "start-analysis",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "id": "webhook-node"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3001/api/internal/update-report",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "reportId",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"reportId\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "running"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Status: Running",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        450,
+        150
+      ],
+      "id": "set-status-running-node"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3001/api/internal/analyze",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "filePath",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"filepath\"]}}"
+            },
+            {
+              "name": "reportId",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"reportId\"]}}"
+            }
+          ]
+        },
+        "options": {
+          "fullResponse": true,
+          "ignoreResponseCode": true
+        }
+      },
+      "name": "Analyze Data (Python)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        650,
+        300
+      ],
+      "id": "analyze-node"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"statusCode\"]}}",
+              "operation": "smaller",
+              "value2": 400
+            }
+          ]
+        }
+      },
+      "name": "IF Analysis OK",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ],
+      "id": "if-analysis-ok-node"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3001/api/internal/update-report",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "reportId",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"reportId\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "completed"
+            },
+            {
+              "name": "results",
+              "value": "={{ [ { \"type\": \"summary\", \"data\": $json[\"body\"][\"summary\"] }, { \"type\": \"plot_path\", \"data\": $json[\"body\"][\"plots\"] } ] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Save Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1050,
+        200
+      ],
+      "id": "save-node"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3001/api/internal/update-report",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "reportId",
+              "value": "={{$node[\"Webhook\"].json[\"body\"][\"reportId\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "failed"
+            },
+            {
+              "name": "results",
+              "value": "={{ [ { \"type\": \"error\", \"data\": $json } ] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Handle Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1050,
+        400
+      ],
+      "id": "error-node"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Status: Running",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status: Running": {
+      "main": [
+        [
+          {
+            "node": "Analyze Data (Python)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Data (Python)": {
+      "main": [
+        [
+          {
+            "node": "IF Analysis OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Analysis OK": {
+      "main": [
+        [
+          {
+            "node": "Save Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

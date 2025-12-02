@@ -1,0 +1,35 @@
+API Endpoints Summary
+=====================
+Base URL: http://localhost:3001
+
+Authentication (/api/auth)
+POST /api/auth/signup        Register a new user
+POST /api/auth/login         Login with email or username
+
+Data (/api/data)
+POST /api/data/upload        Upload a dataset file (protected)
+GET  /api/data/history       Paginated analysis history (protected)
+GET  /api/data/reports/:id   Report details with results (protected)
+
+Internal (/api/internal)
+POST /api/internal/analyze         Run Python analysis script manually
+POST /api/internal/update-report   n8n/worker updates report results/status
+GET  /api/internal/health          Internal service health check
+
+Users (/api/users)
+GET  /api/users/profile        Get current user profile
+PUT  /api/users/profile        Update avatar URL
+GET  /api/users/preferences    Get user UI/data preferences
+PUT  /api/users/preferences    Upsert user preferences
+
+Analytics (/api/analytics)
+GET  /api/analytics/dashboard-stats    Dashboard metrics summary
+GET  /api/analytics/report-summary/:id Detailed report aggregation
+GET  /api/analytics/user-insights      Aggregated user-wide insights
+POST /api/analytics/generate-insights/:reportId  Generate & store AI insights
+
+Notes:
+- Protected endpoints require Authorization: Bearer <JWT>
+- Pagination params: ?page=<number>&limit=<number> on /api/data/history
+- Report lifecycle statuses: processing | completed | failed | cancelled
+- Results types stored: summary, statistics, cleaning, insight, plot_path, correlation, missing_values, outliers, error

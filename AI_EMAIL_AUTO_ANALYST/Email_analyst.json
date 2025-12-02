@@ -1,0 +1,98 @@
+{
+  "name": "Email Ingestion Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "id": "gmail-trigger",
+      "name": "Gmail Trigger"
+    },
+    {
+      "parameters": {
+        "model": "llama3-8b-8192",
+        "prompt": "Analyze this email. \n1. Extract the sender's intent.\n2. Summarize it in one sentence.\n3. Tag it as: 'Urgent', 'Invoice', 'Meeting', or 'General'.\n\nEmail Body:\n{{ $json.snippet }}",
+        "maxTokens": 512
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [200, 0],
+      "id": "ai-classifier",
+      "name": "AI Classifier (Groq)"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "email_brain",
+          "mode": "list",
+          "cachedResultName": "email_brain"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [400, 0],
+      "id": "qdrant-store",
+      "name": "Qdrant Store"
+    },
+    {
+      "parameters": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [400, 200],
+      "id": "embed-model",
+      "name": "Embeddings (HuggingFace)"
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Classifier (Groq)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Classifier (Groq)": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings (HuggingFace)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }  
+  }
+}

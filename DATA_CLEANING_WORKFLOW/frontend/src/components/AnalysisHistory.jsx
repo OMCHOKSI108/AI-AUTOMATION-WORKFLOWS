@@ -1,27 +1,26 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { dataAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { Search, FileText, Calendar, ArrowRight } from 'lucide-react';
+import Card from './common/Card';
+import Badge from './common/Badge';
+import { getStatusVariant } from '../utils/helpers';
 
 const AnalysisHistory = () => {
-    const { user } = useAuth();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchHistory();
-    }, [page]);
+    }, []);
 
     const fetchHistory = async () => {
         try {
             setLoading(true);
-            const response = await dataAPI.getHistory(page, 20);
-            setReports(response.reports);
-            setTotalPages(response.pagination.totalPages);
+            const response = await dataAPI.getHistory();
+            setReports(response.reports || []);
         } catch (error) {
             console.error('Failed to fetch history:', error);
             toast.error('Failed to load analysis history');
@@ -30,111 +29,97 @@ const AnalysisHistory = () => {
         }
     };
 
+    const filteredReports = reports.filter(report => 
+        report.original_filename?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
-        <div className="text-black" style={{ fontFamily: 'Inter, sans-serif', width: '100%', margin: 0, padding: 0, backgroundColor: '#f6f7f8', overflowX: 'hidden', height: '100vh' }}>
-            <div className="flex h-full" style={{ width: '100%', margin: 0 }}>
-                <aside className={`flex w-64 md:w-80 bg-white border-r flex-col fixed md:relative z-50 h-full transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`} style={{ borderColor: '#e2e8f0' }}>
-                    <div className="p-6 flex items-center gap-3">
-                        <div className="bg-blue-600 text-white rounded-full size-10 flex items-center justify-center font-bold text-lg">
-                            {user?.username?.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold">SANS EDA</h1>
-                            <p className="text-sm text-gray-600">{user?.username}</p>
-                        </div>
-                    </div>
-                    <nav className="flex-1 px-4 py-2 space-y-2">
-                        <Link to="/dashboard" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">upload_file</span>
-                            <span>Upload</span>
-                        </Link>
-                        <Link to="/analysis-history" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black bg-blue-50 text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">history</span>
-                            <span>History</span>
-                        </Link>
-                        <Link to="/analysis-report" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">assessment</span>
-                            <span>Reports</span>
-                        </Link>
-                        <Link to="/settings" className="flex items-center gap-3 px-4 py-2 rounded-lg text-black hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                            <span className="material-symbols-outlined">settings</span>
-                            <span>Settings</span>
-                        </Link>
-                    </nav>
-                    <div className="p-4 mt-auto">
-                        <button
-                            onClick={() => window.location.href = '/dashboard'}
-                            className="w-full text-white font-bold py-2 px-4 rounded-lg"
-                            style={{ backgroundColor: '#1173d4', cursor: 'pointer' }}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#0e5bb5'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#1173d4'}
-                        >
-                            New Analysis
-                        </button>
-                    </div>
-                </aside>
-                {isMobileMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)}></div>}
-                <main className="flex-1 h-full p-4 md:p-8 overflow-y-auto">
-                    <div className="md:hidden flex items-center justify-between mb-4">
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
-                        >
-                            <span className="material-symbols-outlined">menu</span>
-                        </button>
-                        <h2 className="text-xl font-bold">Past Analyses</h2>
-                    </div>
-                    <div className="w-full">
-                        <div className="hidden md:block mb-8">
-                            <h2 className="text-3xl font-bold tracking-tight text-black">Past Analyses</h2>
-                            <p className="mt-2 text-gray-600">Review your previously generated analysis reports.</p>
-                        </div>
-                        <div className="mb-6">
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                                <input className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600" placeholder="Search analyses..." type="text" />
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                            {loading ? (
-                                <div className="p-8 text-center">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                                    <p className="mt-2 text-gray-500">Loading analysis history...</p>
-                                </div>
-                            ) : reports.length === 0 ? (
-                                <div className="p-8 text-center">
-                                    <span className="material-symbols-outlined text-4xl text-gray-300">analytics</span>
-                                    <p className="mt-2 text-gray-500">No analysis reports found.</p>
-                                    <p className="text-sm text-gray-400">Upload a dataset to get started.</p>
-                                </div>
-                            ) : (
-                                <ul className="divide-y divide-gray-200">
-                                    {reports.map((report) => (
-                                        <li key={report.report_id} className="group">
-                                            <Link to={`/analysis-report`} state={{ reportId: report.report_id }} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                                                        <span className="material-symbols-outlined">analytics</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-gray-800">{report.original_filename}</p>
-                                                        <p className="text-sm text-gray-500">
-                                                            Status: <span className={`font-medium ${report.status === 'completed' ? 'text-green-600' : report.status === 'failed' ? 'text-red-600' : 'text-yellow-600'}`}>
-                                                                {report.status}
-                                                            </span> | Generated on: {new Date(report.created_at).toLocaleDateString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <span className="material-symbols-outlined text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1">chevron_right</span>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    </div>
-                </main>
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Analysis History</h1>
+                    <p className="text-sm text-gray-600">Review and manage your previously generated analysis reports</p>
+                </div>
+                <div className="relative w-full md:w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                    <input 
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search analyses..." 
+                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#ff9900] focus:border-[#ff9900] shadow-sm"
+                    />
+                </div>
             </div>
+
+            {loading ? (
+                <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#ff9900]"></div>
+                </div>
+            ) : filteredReports.length === 0 ? (
+                <Card className="py-16 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FileText className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900">No reports found</h3>
+                    <p className="text-gray-500 mt-1 mb-6">
+                        {searchTerm ? 'Try adjusting your search terms' : 'Get started by running your first analysis'}
+                    </p>
+                    {!searchTerm && (
+                        <Link 
+                            to="/dashboard"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#ff9900] hover:bg-[#e68a00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ff9900]"
+                        >
+                            Start New Analysis
+                        </Link>
+                    )}
+                </Card>
+            ) : (
+                <div className="grid gap-4">
+                    {filteredReports.map((report) => (
+                        <Link 
+                            key={report.report_id} 
+                            to={`/analysis-report/${report.report_id}`}
+                            className="block group"
+                        >
+                            <Card className="hover:border-[#ff9900] transition-colors duration-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-orange-50 transition-colors">
+                                            <FileText className="text-blue-600 group-hover:text-[#ff9900] transition-colors" size={20} />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-[#ff9900] transition-colors">
+                                                {report.original_filename}
+                                            </h4>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <div className="flex items-center text-xs text-gray-500">
+                                                    <Calendar size={12} className="mr-1" />
+                                                    {new Date(report.created_at).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </div>
+                                                <span className="text-gray-300">|</span>
+                                                <span className="text-xs text-gray-500">ID: {report.report_id.substring(0, 8)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <Badge variant={getStatusVariant(report.status)}>
+                                            {report.status}
+                                        </Badge>
+                                        <ArrowRight size={16} className="text-gray-300 group-hover:text-[#ff9900] transition-colors" />
+                                    </div>
+                                </div>
+                            </Card>
+                        </Link>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

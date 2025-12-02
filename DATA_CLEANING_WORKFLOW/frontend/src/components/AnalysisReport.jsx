@@ -1,27 +1,57 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { dataAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { 
+  FileText, 
+  BarChart2, 
+  AlertTriangle, 
+  CheckCircle, 
+  Clock, 
+  Download,
+  ChevronDown,
+  ChevronUp,
+  Database
+} from 'lucide-react';
+import { formatDate, safeJSONParse } from '../utils/helpers';
 
 const AnalysisReport = () => {
-    const location = useLocation();
+    const { reportId } = useParams();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [expandedSection, setExpandedSection] = useState('summary');
 
     useEffect(() => {
-        const reportId = location.state?.reportId;
         if (reportId) {
             fetchReport(reportId);
         } else {
             toast.error('No report ID provided');
             setLoading(false);
         }
-    }, [location.state]);
+    }, [reportId]);
+
+    // Auto-refresh if report is still processing
+    useEffect(() => {
+        if (report && report.status === 'processing') {
+            const interval = setInterval(() => {
+                fetchReport(reportId);
+            }, 3000); // Refresh every 3 seconds while processing
+            return () => clearInterval(interval);
+        }
+    }, [report, reportId]);
 
     const fetchReport = async (reportId) => {
         try {
             setLoading(true);
             const response = await dataAPI.getReport(reportId);
+            
+            // Parse summary if it's a string (legacy) or keep as object
+            if (response.summary && typeof response.summary === 'string') {
+                response.summary = safeJSONParse(response.summary, response.summary);
+            }
+            
             setReport(response);
         } catch (error) {
             console.error('Failed to fetch report:', error);
@@ -31,87 +61,398 @@ const AnalysisReport = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="w-8 h-8 border-4 border-[#ff9900] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!report) {
+        return (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 text-center py-12">
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">Report Not Found</h2>
+                <Link to="/dashboard" className="text-[#007185] hover:text-[#005a6c] font-medium hover:underline">
+                    Back to Dashboard
+                </Link>
+            </div>
+        );
+    }
+
+    const renderStatisticsTable = (stats) => {
+        if (!stats) return null;
+        
+        const columns = Object.keys(stats);
+        if (columns.length === 0) return null;
+        
+        const metrics = Object.keys(stats[columns[0]]);
+
+        return (
+            <div className="overflow-x-auto">
+                <table className="min-w-full" style={{ border: '1px solid #ddd' }}>
+                    <thead style={{ background: '#f3f3f3' }}>
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#0f1111', borderBottom: '1px solid #ddd' }}>Metric</th>
+                            {columns.map(col => (
+                                <th key={col} className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: '#0f1111', borderBottom: '1px solid #ddd' }}>
+                                    {col}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody style={{ background: '#ffffff' }}>
+                        {metrics.map((metric, idx) => (
+                            <tr key={metric} style={{ borderBottom: idx < metrics.length - 1 ? '1px solid #e5e5e5' : 'none' }}>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium capitalize" style={{ color: '#0f1111' }}>
+                                    {metric}
+                                </td>
+                                {columns.map(col => (
+                                    <td key={`${col}-${metric}`} className="px-4 py-3 whitespace-nowrap text-sm" style={{ color: '#565959' }}>
+                                        {stats[col][metric] !== null ? 
+                                            (typeof stats[col][metric] === 'number' ? 
+                                                stats[col][metric].toFixed(2) : stats[col][metric]) 
+                                            : '-'}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
+    const renderDatasetHead = (dataHead) => {
+        if (!dataHead) return null;
+        
+        try {
+            const data = typeof dataHead === 'string' ? JSON.parse(dataHead) : dataHead;
+            
+            if (Array.isArray(data) && data.length > 0) {
+                const columns = Object.keys(data[0]);
+                
+                return (
+                    <div className="overflow-x-auto relative shadow-sm rounded-lg border border-gray-200">
+                        <table className="min-w-full text-sm divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    {columns.map(col => (
+                                        <th 
+                                            key={col} 
+                                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap" 
+                                        >
+                                            {col}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {data.map((row, idx) => (
+                                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                        {columns.map(col => (
+                                            <td 
+                                                key={`${idx}-${col}`} 
+                                                className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap" 
+                                            >
+                                                {row[col] !== null && row[col] !== undefined ? String(row[col]).substring(0, 50) : '-'}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                );
+            }
+        } catch (error) {
+            console.error('Error rendering dataset head:', error);
+        }
+        return null;
+    };
+
+    const handleDownload = async () => {
+        try {
+            const response = await dataAPI.downloadCleanedData(reportId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `cleaned_${report.originalFilename}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Download failed:', error);
+            toast.error('Failed to download cleaned file');
+        }
+    };
+
+    const handleDownloadPDF = async () => {
+        try {
+            toast.loading('Generating PDF...');
+            const response = await dataAPI.downloadPDF(reportId);
+            
+            // Create blob with correct PDF MIME type
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `analysis_report_${report.originalFilename}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            setTimeout(() => {
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            }, 100);
+            
+            toast.dismiss();
+            toast.success('PDF downloaded successfully!');
+        } catch (error) {
+            console.error('PDF generation failed:', error);
+            toast.dismiss();
+            toast.error('Failed to generate PDF');
+        }
+    };
+
+    const isStructuredSummary = report.summary && typeof report.summary === 'object';
+
     return (
-        <div style={{ width: '100%', margin: 0, padding: 0, fontFamily: 'Inter, sans-serif', overflowX: 'hidden' }}>
-            <div className="flex min-h-screen w-full flex-col" style={{ margin: 0 }}>
-                <header className="sticky top-0 z-10 flex h-16 items-center border-b border-gray-200 bg-white bg-opacity-80 px-4 backdrop-blur-sm sm:px-6 lg:px-8">
-                    <div className="flex w-full items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <svg className="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeLinecap="round" strokeLinejoin="round"></path>
-                            </svg>
-                            <h1 className="text-xl font-bold">SANS EDA</h1>
+        <div className="space-y-6 pb-12">
+                {/* Header */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold flex items-center text-gray-900">
+                                <FileText className="mr-2 text-[#ff9900]" />
+                                Analysis Report
+                            </h1>
+                            <p className="mt-1 text-gray-600 text-sm">
+                                {report.originalFilename} • {formatDate(report.createdAt)}
+                            </p>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <button className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2" style={{ backgroundColor: '#1173d4', borderColor: '#1173d4' }} onMouseOver={(e) => e.target.style.backgroundColor = '#0e5bb5'} onMouseOut={(e) => e.target.style.backgroundColor = '#1173d4'}>
-                                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-                                Get PDF Export
-                            </button>
+                        <div className="flex items-center gap-3">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                report.status === 'completed' ? 'bg-[#e6f4f1] text-[#067d62]' :
+                                report.status === 'processing' ? 'bg-[#fff8e6] text-[#b76e00]' :
+                                'bg-[#fef2f2] text-[#d13212]'
+                            }`}>
+                                {report.status === 'completed' && <CheckCircle size={16} className="mr-1" />}
+                                {report.status === 'processing' && <Clock size={16} className="mr-1" />}
+                                {report.status === 'failed' && <AlertTriangle size={16} className="mr-1" />}
+                                {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                            </span>
+                            {report.status === 'completed' && (
+                                <>
+                                    <button 
+                                        onClick={handleDownloadPDF}
+                                        className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium shadow-md hover:shadow-lg"
+                                    >
+                                        <Download size={16} className="mr-2" />
+                                        Download PDF
+                                    </button>
+                                    {report.cleaning && (
+                                        <button 
+                                            onClick={handleDownload}
+                                            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium shadow-md hover:shadow-lg"
+                                        >
+                                            <Download size={16} className="mr-2" />
+                                            Download Cleaned Data
+                                        </button>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
-                </header>
-                <main className="flex-1">
-                    <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold leading-tight text-gray-900">Dynamic Report: Customer Segmentation</h2>
-                            <p className="mt-1 text-gray-600">Generated on: October 26, 2023</p>
+                </div>
+
+                {/* Processing State */}
+                {report.status === 'processing' && (
+                    <div className="bg-[#fff8e6] border border-[#ff9900] rounded-lg p-6 flex items-center">
+                        <div className="w-8 h-8 border-4 border-[#ff9900] border-t-transparent rounded-full animate-spin mr-4"></div>
+                        <div>
+                            <h3 className="text-lg font-medium text-[#b76e00]">Analysis in Progress</h3>
+                            <p className="text-[#865c00] text-sm">Your data is being processed. This page will update automatically.</p>
                         </div>
-                        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                            <div className="lg:col-span-2">
-                                <div className="space-y-8">
-                                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                                        <h3 className="text-xl font-semibold text-gray-900">Visualizations</h3>
-                                        <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                            <div className="overflow-hidden rounded-lg border border-gray-200">
-                                                <img alt="Sales distribution chart" className="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARAAKmF4XijdJgssB7ZvIiBaN1E9TvJPKkurccRydbpMBujZVYpNz9D6y02ctIhXUrH7GT4RaM5lmq6e339G-C9VAcsIMD8NTCxahrGD3GSSy_WK5bSLC8gRCIsLXy2rWqryqHPUvwmnU-MKb1vLuLFt0ZyLWnTG-C7GMnA7eKjcTfUxCwO_5gwCZoePGXElR4wy3MJ3n7hMKFGhqm2yFMqRG8PH4YySYg_3bngUH97JP33qhIkILWPd8NOlcRzsQDkXbSuTYkWQ" />
-                                            </div>
-                                            <div className="overflow-hidden rounded-lg border border-gray-200">
-                                                <img alt="Marketing spend vs revenue plot" className="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUNY9cy0geEX-vV_D38bnUhqkw2HsUOV9Gd2xw2KdlwEzU3z6KI2KB8-Kt_N1Jq6kQQ0OJ2FqO5VizwYwPG92coJh4tqHj_7q8tQ6DjgOO1rIcVOsQ_2iUZXMBx6BXH-WZy9tkSww84r4-xv2ukyyMQDMGuwA2j4Ac8qfXbngduAP2jtZE_-G27qY1MNhqgI-JFKF5UFyaaSOU9zNdQERn_2Hwdz-8G8LbyiYQj5zkGdIneaZWRCqC6zgLHq9eNEZkW1sWL5AutA" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                                        <h3 className="text-xl font-semibold text-gray-900">AI-Generated Insights</h3>
-                                        <div className="mt-4 space-y-4 text-gray-600">
-                                            <p>The analysis identifies three distinct customer segments based on purchasing behavior. Segment A, characterized by high frequency and low monetary value, represents the largest group. Segment B shows high monetary value but infrequent purchases, suggesting a potential for targeted loyalty programs. Segment C is a mix of moderate frequency and value.</p>
-                                            <p>A strong positive correlation exists between website engagement time and conversion rates across all segments. This suggests that enhancing user experience and providing valuable content could significantly boost sales.</p>
-                                        </div>
-                                    </div>
+                    </div>
+                )}
+
+                {/* Errors */}
+                {report.errors && report.errors.length > 0 && (
+                    <div className="bg-[#fef2f2] border border-[#d13212] rounded-lg p-6">
+                        <h3 className="text-lg font-medium mb-2 flex items-center text-[#d13212]">
+                            <AlertTriangle className="mr-2" /> Analysis Errors
+                        </h3>
+                        <ul className="list-disc list-inside space-y-1 text-[#991b1b] text-sm">
+                            {report.errors.map((error, index) => (
+                                <li key={index}>{typeof error === 'string' ? error : JSON.stringify(error)}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {/* Main Content Grid */}
+                <div className="space-y-6">
+                    
+                    {/* AI Insights - Full Width */}
+                    {report.insights && (
+                        <div className="bg-[#e6f4f9] border border-[#007eb9] rounded-lg overflow-hidden">
+                            <div className="border-b border-[#007eb9] px-6 py-4">
+                                <h3 className="text-lg font-semibold text-[#007eb9]">✨ AI Insights</h3>
+                            </div>
+                            <div className="prose prose-sm max-w-none p-6">
+                                <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                        h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2 text-gray-900" {...props} />,
+                                        h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-3 mb-2 text-gray-800" {...props} />,
+                                        h3: ({node, ...props}) => <h3 className="text-base font-semibold mt-2 mb-1 text-gray-800" {...props} />,
+                                        p: ({node, ...props}) => <p className="text-sm text-gray-700 mb-2 leading-relaxed" {...props} />,
+                                        ul: ({node, ...props}) => <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 mb-2" {...props} />,
+                                        ol: ({node, ...props}) => <ol className="text-sm text-gray-700 list-decimal list-inside space-y-1 mb-2" {...props} />,
+                                        li: ({node, ...props}) => <li className="text-sm text-gray-700" {...props} />,
+                                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-500 pl-4 italic text-sm text-gray-600 my-2" {...props} />,
+                                        code: ({node, inline, ...props}) => 
+                                            inline 
+                                                ? <code className="bg-gray-100 px-2 py-1 rounded text-xs font-mono text-red-600" {...props} />
+                                                : <code className="bg-gray-100 p-3 rounded block text-xs font-mono text-gray-800 overflow-x-auto" {...props} />,
+                                        pre: ({node, ...props}) => <pre className="bg-gray-100 p-3 rounded mb-2 overflow-x-auto" {...props} />,
+                                        table: ({node, ...props}) => <table className="w-full border-collapse border border-gray-300 text-xs mb-2" {...props} />,
+                                        th: ({node, ...props}) => <th className="border border-gray-300 px-2 py-1 bg-gray-200 font-semibold" {...props} />,
+                                        td: ({node, ...props}) => <td className="border border-gray-300 px-2 py-1" {...props} />,
+                                        strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
+                                        em: ({node, ...props}) => <em className="italic text-gray-800" {...props} />,
+                                    }}
+                                >
+                                    {typeof report.insights === 'string' ? report.insights : JSON.stringify(report.insights)}
+                                </ReactMarkdown>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Content Below AI Insights */}
+                    <div className="space-y-6">
+
+                        {/* Dataset Head Preview */}
+                        {report.summary && isStructuredSummary && (report.summary.sampleData || report.summary.data_head) && (
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="border-b border-gray-200 px-6 py-4">
+                                    <h3 className="text-lg font-semibold flex items-center text-gray-900">
+                                        <Database className="mr-2 text-[#ff9900]" /> Dataset Preview
+                                    </h3>
+                                    <p className="text-sm mt-1 text-gray-600">First few rows of your dataset</p>
+                                </div>
+                                <div className="p-6">
+                                    {renderDatasetHead(report.summary.sampleData || report.summary.data_head)}
                                 </div>
                             </div>
-                            <div className="lg:col-span-1">
-                                <div className="sticky top-24">
-                                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                                        <h3 className="text-xl font-semibold text-gray-900">Data Summary</h3>
-                                        <div className="mt-4 space-y-4">
-                                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                                                <p className="text-sm text-gray-600">Number of Rows</p>
-                                                <p className="text-sm font-medium text-gray-900">15,782</p>
+                        )}
+
+                        {/* Visualizations */}
+                        {(report.plots?.length > 0 || report.statistics?.visualizations) && (
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="border-b border-gray-200 px-6 py-4">
+                                    <h3 className="text-lg font-semibold flex items-center text-gray-900">
+                                        <BarChart2 className="mr-2 text-[#ff9900]" /> Visualizations
+                                    </h3>
+                                </div>
+                                <div className="p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Legacy Plots (URLs) */}
+                                        {report.plots?.map((plot, index) => (
+                                            <div key={`legacy-${index}`} className="rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                                <img
+                                                    src={`${import.meta.env.VITE_API_URL}${plot}`}
+                                                    alt={`Plot ${index + 1}`}
+                                                    className="w-full h-auto object-contain bg-gray-50"
+                                                />
                                             </div>
-                                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                                                <p className="text-sm text-gray-600">Number of Columns</p>
-                                                <p className="text-sm font-medium text-gray-900">12</p>
-                                            </div>
-                                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                                                <p className="text-sm text-gray-600">Data Types</p>
-                                                <div className="flex flex-wrap justify-end gap-1">
-                                                    <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">Numerical</span>
-                                                    <span className="rounded-full bg-pink-100 px-2 py-0.5 text-xs font-medium text-pink-800">Categorical</span>
-                                                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Datetime</span>
+                                        ))}
+                                        
+                                        {/* New Base64 Plots */}
+                                        {report.statistics?.visualizations?.correlation_matrix && (
+                                            <div className="rounded-lg overflow-hidden shadow-sm border border-gray-200 col-span-1 md:col-span-2">
+                                                <img
+                                                    src={report.statistics.visualizations.correlation_matrix}
+                                                    alt="Correlation Matrix"
+                                                    className="w-full h-auto object-contain bg-gray-50"
+                                                />
+                                                <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
+                                                    <p className="text-xs text-center font-bold text-gray-600">Correlation Matrix</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                                                <p className="text-sm text-gray-600">Missing Values</p>
-                                                <p className="text-sm font-medium text-red-600">3.2%</p>
+                                        )}
+                                        
+                                        {report.statistics?.visualizations?.distributions?.map((dist, index) => (
+                                            <div key={`dist-${index}`} className="rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                                <img
+                                                    src={dist.image}
+                                                    alt={`Distribution of ${dist.name}`}
+                                                    className="w-full h-auto object-contain bg-gray-50"
+                                                />
+                                                <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
+                                                    <p className="text-xs text-center font-bold text-gray-600">Distribution: {dist.name}</p>
+                                                </div>
                                             </div>
-                                        </div>
+                                        ))}
+
+                                        {report.statistics?.visualizations?.categorical?.map((cat, index) => (
+                                            <div key={`cat-${index}`} className="rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                                <img
+                                                    src={cat.image}
+                                                    alt={`Categories in ${cat.name}`}
+                                                    className="w-full h-auto object-contain bg-gray-50"
+                                                />
+                                                <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
+                                                    <p className="text-xs text-center font-bold text-gray-600">Top Categories: {cat.name}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {/* Clustering Analysis (Detective Mode) */}
+                                        {report.statistics?.visualizations?.clustering && (
+                                            <div className="rounded-lg overflow-hidden shadow-sm border border-gray-200 col-span-1 md:col-span-2">
+                                                <img
+                                                    src={report.statistics.visualizations.clustering}
+                                                    alt="Cluster Analysis"
+                                                    className="w-full h-auto object-contain bg-gray-50"
+                                                />
+                                                <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
+                                                    <p className="text-xs text-center font-bold text-gray-600">🔍 Detective Analysis: Data Clusters</p>
+                                                    {report.statistics.clustering_insight && (
+                                                        <p className="text-xs text-center mt-1 text-gray-500 italic">{report.statistics.clustering_insight}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
+                        )}
+
+                    {/* File Details */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="border-b border-gray-200 px-6 py-4">
+                            <h3 className="text-lg font-semibold text-gray-900">File Details</h3>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <p className="text-sm text-gray-600">Filename</p>
+                                <p className="font-medium break-all text-gray-900">{report.originalFilename}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Report ID</p>
+                                <p className="font-mono text-xs p-2 rounded mt-1 text-gray-600 bg-gray-100">{report.reportId}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Created At</p>
+                                <p className="font-medium text-gray-900">{formatDate(report.createdAt)}</p>
+                            </div>
                         </div>
                     </div>
-                </main>
-            </div>
+                    </div>
+                </div>
         </div>
     );
 };

@@ -1,0 +1,35 @@
+SANS EDA API Endpoints
+
+Base URL: http://localhost:5000/api
+
+Auth
+- POST /auth/signup: Register user (body: { username, email, password })
+- POST /auth/login: Login (body: { emailOrUsername, password })
+
+Data
+- POST /data/upload: Upload dataset (multipart/form-data: dataset). Requires Bearer token.
+- GET /data/history: Paginated history (query: page, limit). Requires Bearer token.
+- GET /data/reports/:id: Detailed report. Requires Bearer token.
+
+Internal
+- POST /internal/analyze: Run Python analysis (body: { filePath, reportId })
+- POST /internal/update-report: Update report (body: { reportId, status?, resultType?, content?, error? })
+- GET  /internal/health: Internal health check
+
+Users
+- GET  /users/profile: Current user profile
+- PUT  /users/profile: Update avatar_url (body: { avatar_url })
+- GET  /users/preferences: Get preferences
+- PUT  /users/preferences: Upsert preferences (body: { theme, default_visualization_type, notifications_enabled })
+
+Analytics
+- GET  /analytics/dashboard-stats: Aggregated stats for user
+- GET  /analytics/report-summary/:id: Organized results for a report
+- GET  /analytics/user-insights: File types, upload frequency, success trend
+- POST /analytics/generate-insights/:reportId: Generate + store AI insights (body: { summaryData })
+
+Notes
+- All routes are prefixed with /api.
+- Protected routes require Authorization: Bearer <token>.
+- Upload size limit: 50MB. Supported types: CSV, XLSX, XLS, JSON, TXT.
+- Backend triggers n8n via N8N_WEBHOOK_URL env (if configured).

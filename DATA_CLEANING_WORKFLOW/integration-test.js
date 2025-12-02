@@ -1,7 +1,7 @@
 // Integration Test Script for Frontend-Backend Connection
 // Run this in browser console when both servers are running
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE = 'http://localhost:3000';
 
 // Test 1: Backend Health Check
 async function testBackendHealth() {
