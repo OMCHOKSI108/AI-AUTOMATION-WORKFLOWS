@@ -1,5 +1,9 @@
 AI Email Auto Analyst (n8n + Qdrant + Postgres)
 
+Live Demo (GIF)
+
+![Email AI Analyst Demo](assets/email_ai_analyst.gif)
+
 This project ingests incoming emails, auto-analyzes them (summarize, classify, extract tasks), stores embeddings in a vector database for semantic search, and exposes a RAG chat endpoint for natural-language queries. It runs locally via Docker and uses n8n for orchestration, Qdrant for vectors, OpenAI/Hugging Face for LLMs and embeddings, and Postgres for chat memory.
 
 Designed for practicality and demoability: Gmail-based workflows handle real inboxes, classification creates actionable tags, and the RAG chatbot answers questions like “Show me urgent supplier emails this week” grounded by retrieved email context. The stack is minimal, easy to run, and extendable.
@@ -20,9 +24,7 @@ Workflows (Screenshots)
 	![Gather Vector DB](assets/GATHER_VECTOR_DB.png)
 
 Demo (GIF)
-- End-to-end demo of ingest, classify, embed, and chat:
-
-	![Email AI Analyst Demo](assets/email_ai_analyst.gif)
+- End-to-end demo of ingest, classify, embed, and chat (same as above).
 
 Credentials Required
 - OpenAI: `OPENAI_API_KEY` for chat and embeddings (or use Hugging Face for embeddings, `HF_API_TOKEN`).
@@ -54,3 +56,8 @@ Repository Structure
 Notes
 - If using Hugging Face embeddings (384 dims), create the Qdrant collection accordingly. For OpenAI embeddings (1536 dims), use a separate collection or recreate with the correct vector size.
 - Inside Docker, use `postgres` as the hostname for the Postgres Chat Memory node.
+ 
+Documentation
+- Architecture: `docs/architecture.md`
+- Run Guide: `docs/run-guide.md`
+- Models & Credentials: `docs/models-and-credentials.md`
