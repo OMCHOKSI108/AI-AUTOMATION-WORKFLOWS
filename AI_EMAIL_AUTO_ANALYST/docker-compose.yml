@@ -14,10 +14,25 @@ services:
       - NODE_ENV=${NODE_ENV}
       - WEBHOOK_URL=${WEBHOOK_URL}
       - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - TZ=${TZ}
+      - GENERIC_TIMEZONE=${TZ}
+      # App credentials for nodes (available as $env vars in n8n)
+      - QDRANT_URL=${QDRANT_URL}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_API_TOKEN=${HF_API_TOKEN}
+      - EMAIL_IMAP_HOST=${EMAIL_IMAP_HOST}
+      - EMAIL_IMAP_PORT=${EMAIL_IMAP_PORT}
+      - EMAIL_IMAP_SSL=${EMAIL_IMAP_SSL}
+      - EMAIL_IMAP_USER=${EMAIL_IMAP_USER}
+      - EMAIL_IMAP_PASSWORD=${EMAIL_IMAP_PASSWORD}
     volumes:
       - n8n_data:/home/node/.n8n
     depends_on:
       - qdrant
+      - postgres
 
   qdrant:
     image: qdrant/qdrant
@@ -28,6 +43,20 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: email-brain-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
 volumes:
   n8n_data:
   qdrant_data:
+  pg_data:

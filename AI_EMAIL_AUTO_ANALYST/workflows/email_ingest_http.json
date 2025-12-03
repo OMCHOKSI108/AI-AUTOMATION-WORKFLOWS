@@ -1,0 +1,286 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 20,
+        "filters": {
+          "receivedAfter": "={{ $now.minus({ hours: 48 }).toISO() }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -528,
+        0
+      ],
+      "name": "Get Last 48h Emails",
+      "id": "0a5ff076-0912-49f4-89e0-aaca6490b924",
+      "webhookId": "4e37ac34-47b5-4f40-a9aa-f05fecdc83c0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LjhoyyYLGYgMLpTy",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -272,
+        0
+      ],
+      "name": "Split in Batches",
+      "id": "f2cb10f8-193a-43c8-8867-91bf057adb25"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean HTML to Text (Safe Version)\nconst json = $input.item.json;\n\n// Safe extraction: Use snippet if available, OR try body.html safely using ?.\nconst snippet = json.snippet || '';\nconst htmlBody = json.body?.html || ''; \nconst textContent = snippet || htmlBody || '';\n\n// Remove HTML tags and extra spaces\nconst text = textContent\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .slice(0, 2000);\n\nreturn {\n  json: {\n    ...json,\n    clean_text: text,\n    email_id: json.id || json.threadId // Store unique ID to prevent duplicates\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        0
+      ],
+      "name": "Clean HTML",
+      "id": "9fb871c0-f07b-4639-a61a-e3aca78b3896"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following email data:\n\nSubject: {{ $json.subject }}\nFrom: {{ $json.from }}\nContent: {{ $json.clean_text }}\n\nYour Task:\nExtract structured data into a valid JSON object.\n\nRequired Fields:\n1. \"summary\": A concise summary of the email (max 30 words).\n2. \"intent\": Classify the intent as one of these: [Invoice, Meeting, Inquiry, Spam, Newsletter, Urgent, General].\n3. \"tags\": An array of relevant keywords (e.g. [\"Finance\", \"HR\", \"Marketing\"]).\n\nOUTPUT RULES:\n- Return ONLY the raw JSON object.\n- Do NOT use Markdown code blocks (no ```json)."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        176,
+        0
+      ],
+      "name": "Basic LLM Chain (Classify)",
+      "id": "ea519027-d6d8-4b4e-86f2-12f7d4a4e3ce"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        176,
+        240
+      ],
+      "name": "Groq Chat Model",
+      "id": "cb355a86-38fd-4f92-a951-442c180b7271",
+      "credentials": {
+        "groqApi": {
+          "id": "iTFW6xSSL5dtcVBT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the LLM response string into JSON object\nconst llmOutput = $input.item.json.text;\nlet classification = {};\ntry {\n  classification = JSON.parse(llmOutput.replace(/```json|```/g, ''));\n} catch(e) {\n  classification = { summary: llmOutput, intent: 'General', tags: [] };\n}\n\n// Get email data from the Clean HTML node - Fixed for n8n v1.122.4+\nconst emailData = $node['Clean HTML'].json;\n\n// Output specific fields for the Data Loader to pick up\nreturn {\n  json: {\n    pageContent: emailData.clean_text,\n    metadata: {\n      email_id: emailData.email_id,\n      subject: emailData.subject,\n      from: emailData.from,\n      date: emailData.internalDate,\n      intent: classification.intent,\n      summary: classification.summary,\n      tags: classification.tags || []\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "name": "Prepare for Vector Store",
+      "id": "69387e89-aa27-45dc-baf7-f95fdc1461fa"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "={{$env.QDRANT_COLLECTION}}",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [
+        656,
+        0
+      ],
+      "name": "Qdrant (Insert)",
+      "id": "f97f6e86-a76c-43ed-9567-f8e14d80c7a0",
+      "credentials": {
+        "qdrantApi": {
+          "id": "Sb3fhs9zKw8qxxwf",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        656,
+        208
+      ],
+      "name": "Embeddings HuggingFace Inference",
+      "id": "98785fed-fd3f-4ada-9ae6-9a104e810c5d",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "v2msbtgh28fBqE8T",
+          "name": "HuggingFaceApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        224
+      ],
+      "name": "Default Data Loader",
+      "id": "091dd7fd-a871-4d15-89ed-b45d2f4d4437"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        0
+      ],
+      "id": "526dc9ec-a0ee-4814-885a-600fef1c9cff",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "connections": {
+    "Get Last 48h Emails": {
+      "main": [
+        [
+          {
+            "node": "Split in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split in Batches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Clean HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean HTML": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain (Classify)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain (Classify)": {
+      "main": [
+        [
+          {
+            "node": "Prepare for Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain (Classify)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Qdrant (Insert)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant (Insert)": {
+      "main": [
+        [
+          {
+            "node": "Split in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant (Insert)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant (Insert)",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Last 48h Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "ff69d0edb3eafd792dfca234774c163ee841c8f70f5904f497ebd11599419ea6"
+  }
+}
