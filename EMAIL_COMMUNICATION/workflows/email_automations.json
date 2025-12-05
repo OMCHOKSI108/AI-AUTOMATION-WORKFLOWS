@@ -1,0 +1,229 @@
+{
+  "name": "Smart Email Agentic Workflow with Gmail",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "event": "received",
+        "labelIds": [
+          "INBOX"
+        ],
+        "options": {
+          "downloadAttachments": false
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "Extract Email Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [480, 300],
+      "parameters": {
+        "functionCode": "const email = items[0].json;\n\n// Extract sender info\nconst fromHeader = email.payload.headers.find(h => h.name === 'From');\nconst subjectHeader = email.payload.headers.find(h => h.name === 'Subject');\nconst dateHeader = email.payload.headers.find(h => h.name === 'Date');\n\n// Extract body text\nconst getBodyText = (payload) => {\n  if (payload.body && payload.body.data) {\n    return Buffer.from(payload.body.data, 'base64').toString('utf-8');\n  }\n  if (payload.parts) {\n    for (const part of payload.parts) {\n      if (part.mimeType === 'text/plain' && part.body && part.body.data) {\n        return Buffer.from(part.body.data, 'base64').toString('utf-8');\n      }\n    }\n  }\n  return '';\n};\n\nconst bodyText = getBodyText(email.payload);\n\nreturn [{\n  json: {\n    messageId: email.id,\n    threadId: email.threadId,\n    subject: subjectHeader ? subjectHeader.value : '',\n    from: fromHeader ? fromHeader.value : '',\n    date: dateHeader ? dateHeader.value : '',\n    text: bodyText,\n    html: bodyText // Gmail API doesn't separate html/plain easily\n  }\n}];"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Parse Sender Email",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "parameters": {
+        "functionCode": "const email = items[0].json;\n\n// Parse email from 'Name <email@domain.com>' format\nconst fromMatch = email.from.match(/([^<]+)<([^>]+)>/);\nconst senderName = fromMatch ? fromMatch[1].trim() : null;\nconst senderEmail = fromMatch ? fromMatch[2] : email.from;\n\nreturn [{\n  json: {\n    ...email,\n    senderName,\n    senderEmail\n  }\n}];"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Classify & Extract",
+      "type": "@n8n/n8n-nodes-langchain.chatOpenAi",
+      "typeVersion": 1,
+      "position": [920, 300],
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are an AI email triage and extraction system for a high profile investment and trading firm.\\n\\nGOAL:\\nClassify the incoming email and extract structured details for the CRM.\\n\\nOUTPUT STRICTLY AS VALID JSON with this shape:\\n{\\n  \\\"category\\\": \\\"WORK_INQUIRY|GENERAL_QUERY|ANNOUNCEMENT|SPAM\\\",\\n  \\\"sender_name\\\": \\\"{{$json.senderName}}\\\",\\n  \\\"sender_email\\\": \\\"{{$json.senderEmail}}\\\",\\n  \\\"company\\\": string | null,\\n  \\\"subject\\\": \\\"{{$json.subject}}\\\",\\n  \\\"work_type\\\": string | null,\\n  \\\"budget\\\": string | null,\\n  \\\"timeline\\\": string | null,\\n  \\\"priority\\\": \\\"LOW|MEDIUM|HIGH|CRITICAL\\\" | null,\\n  \\\"language\\\": string | null,\\n  \\\"is_work_clear\\\": boolean,\\n  \\\"confidence\\\": number (0-100),\\n  \\\"clarity_reason\\\": string\\n}\\n\\nIf unsure, choose the best guess and explain in clarity_reason. Never add commentary outside JSON."
+          },
+          {
+            "role": "user",
+            "content": "EMAIL RAW BODY:\\n{{$json.text}}"
+          }
+        ],
+        "options": {}
+      }
+    },
+    {
+      "id": "5",
+      "name": "Parse LLM Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1140, 300],
+      "parameters": {
+        "functionCode": "const email = items[0].json;\nconst llmResponse = items[0].json.response;\n\ntry {\n  const llm = JSON.parse(llmResponse);\n  return [{ json: { email, llm } }];\n} catch (e) {\n  console.error('Failed to parse LLM response:', e);\n  return [{ json: { email, llm: {} } }];\n}"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Upsert Party & Thread",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1360, 300],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH upsert_party AS (\n  INSERT INTO email_brain.parties (email, name, company)\n  VALUES ('{{$json.llm.sender_email}}', '{{$json.llm.sender_name}}', '{{$json.llm.company}}')\n  ON CONFLICT (email) DO UPDATE\n    SET name = COALESCE(EXCLUDED.name, email_brain.parties.name),\n        company = COALESCE(EXCLUDED.company, email_brain.parties.company)\n  RETURNING id\n), upsert_thread AS (\n  INSERT INTO email_brain.email_threads (party_id, subject, category, status, latest_summary, confidence)\n  VALUES (\n    (SELECT id FROM upsert_party),\n    '{{$json.email.subject}}',\n    '{{$json.llm.category}}',\n    CASE\n      WHEN '{{$json.llm.category}}' IN ('ANNOUNCEMENT','SPAM') THEN 'CLOSED'\n      WHEN {{$json.llm.is_work_clear}} = true THEN 'WORK_CLEAR'\n      ELSE 'CLARIFICATION_PENDING'\n    END,\n    '{{$json.llm.clarity_reason}}',\n    {{$json.llm.confidence}}\n  )\n  RETURNING id\n)\nINSERT INTO email_brain.email_messages\n  (thread_id, direction, message_id, from_email, to_email, subject, raw_body, cleaned_body, sent_at)\nVALUES\n  (\n    (SELECT id FROM upsert_thread),\n    'INBOUND',\n    '{{$json.email.messageId}}',\n    '{{$json.llm.sender_email}}',\n    (SELECT email FROM email_brain.parties WHERE id = (SELECT id FROM upsert_party)),\n    '{{$json.email.subject}}',\n    '{{$json.email.text}}',\n    '{{$json.email.text}}',\n    '{{$json.email.date}}'\n  )\nRETURNING thread_id as thread_id;",
+        "additionalFields": {
+          "ssl": true
+        }
+      }
+    },
+    {
+      "id": "7",
+      "name": "Decide & Draft Reply",
+      "type": "@n8n/n8n-nodes-langchain.chatOpenAi",
+      "typeVersion": 1,
+      "position": [1580, 300],
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a professional email assistant for a high profile trading and investment firm.\\n\\nYou will draft a SINGLE email reply to the sender.\\n\\nRules:\\n- Use a formal, concise, respectful tone.\\n- Do not invent prices or commitments.\\n- If email category is ANNOUNCEMENT or SPAM, respond with an empty string.\\n- If work is not yet clear, ask 2-5 targeted questions to clarify the work type, scope, budget, and timeline.\\n- If work is clear, acknowledge clarity and say that the Head will personally respond soon."
+          },
+          {
+            "role": "user",
+            "content": "Input JSON (classification and extraction):\\n{{$json.llm}}\\n\\nORIGINAL EMAIL:\\n{{$json.email.text}}\\n\\nOutput ONLY the final email body, no JSON, no subject line."
+          }
+        ],
+        "options": {}
+      }
+    },
+    {
+      "id": "8",
+      "name": "Send Gmail Reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [1800, 300],
+      "parameters": {
+        "operation": "send",
+        "message": {
+          "to": "{{$json.llm.sender_email}}",
+          "subject": "Re: {{$json.email.subject}}",
+          "body": "{{$json.response}}"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9",
+      "name": "Log AI Decision",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [2020, 300],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO email_brain.ai_logs (thread_id, action, model, prompt, raw_response, success)\nVALUES (\n  {{$json.thread_id}},\n  'FULL_PIPELINE',\n  'gpt-4o-mini',\n  'CLASSIFY+EXTRACT+REPLY',\n  '{{JSON.stringify($json)}}',\n  true\n);",
+        "additionalFields": {
+          "ssl": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email Content": {
+      "main": [
+        [
+          {
+            "node": "Parse Sender Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Sender Email": {
+      "main": [
+        [
+          {
+            "node": "Classify & Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify & Extract": {
+      "main": [
+        [
+          {
+            "node": "Parse LLM Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LLM Response": {
+      "main": [
+        [
+          {
+            "node": "Upsert Party & Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Party & Thread": {
+      "main": [
+        [
+          {
+            "node": "Decide & Draft Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide & Draft Reply": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail Reply": {
+      "main": [
+        [
+          {
+            "node": "Log AI Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

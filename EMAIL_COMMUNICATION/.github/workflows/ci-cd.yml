@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Install dependencies (server)
+      run: cd server && npm install
+    - name: Install dependencies (frontend)
+      run: cd frontend && npm install
+    - name: Lint server
+      run: cd server && npm run lint
+    - name: Lint frontend
+      run: cd frontend && npm run lint
+    - name: Test server
+      run: cd server && npm test
+    - name: Test frontend
+      run: cd frontend && npm test
+    - name: Build frontend
+      run: cd frontend && npm run build
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build and push Docker images
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker-compose build
+        docker tag email-frontend ${{ secrets.DOCKER_USERNAME }}/email-frontend:latest
+        docker tag email-server ${{ secrets.DOCKER_USERNAME }}/email-server:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/email-frontend:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/email-server:latest
+    - name: Deploy to production
+      run: |
+        # Add deployment commands here, e.g., kubectl apply or docker-compose up on server

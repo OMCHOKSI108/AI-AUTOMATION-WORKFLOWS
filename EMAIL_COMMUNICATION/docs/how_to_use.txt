@@ -1,0 +1,135 @@
+How to Use the Email Communication Automation System
+
+This guide explains how to set up and use the AI-powered email automation system.
+
+## Prerequisites
+- Docker and Docker Compose installed
+- Gmail account with Gmail API enabled
+- API keys for AI services (Groq, OpenAI, or Hugging Face)
+
+## Setup Instructions
+
+1. Clone or download the repository.
+
+2. Navigate to the project directory:
+   cd AI-AUTOMATION-WORKFLOWS/EMAIL_COMMUNICATION
+
+3. Copy the environment template:
+   cp .env.example .env
+
+4. Set up Gmail OAuth2 credentials:
+   - Go to Google Cloud Console (https://console.cloud.google.com/)
+   - Create a new project or select existing one
+   - Enable Gmail API
+   - Create OAuth2 credentials (Web application type)
+   - Set authorized redirect URI: http://localhost:5678/rest/oauth2-credential/callback
+   - Copy Client ID and Client Secret to .env
+
+5. Edit .env file and fill in your credentials:
+   - GMAIL_CLIENT_ID: Your Google OAuth2 Client ID
+   - GMAIL_CLIENT_SECRET: Your Google OAuth2 Client Secret
+   - GROQ_API_KEY: Get from https://console.groq.com/
+   - JWT_SECRET: A random string for security (generate a long random string)
+   - Other fields as needed
+
+6. Start the services:
+   docker-compose up -d
+
+7. Wait for all services to be healthy (check with docker ps)
+
+## Accessing the System
+
+- Dashboard: http://localhost:4173
+- n8n Workflow Editor: http://localhost:5678
+- API Server: http://localhost:4000
+
+## Setting up Gmail Credentials in n8n
+
+1. Open n8n at http://localhost:5678
+2. Go to Settings > Credentials
+3. Create new credential of type "Gmail OAuth2 API"
+4. Enter your Client ID and Client Secret
+5. Click "Connect my account" and authorize the application
+6. Save the credential
+
+## Importing the Workflow
+
+1. In n8n, go to Workflows
+2. Click "Import from File"
+3. Select the workflows/email_automations.json file
+4. The workflow will be imported with all nodes configured
+
+## Login to Dashboard
+
+Username: omchoksi or omchoksi99@gmail.com
+Password: omchoksi
+
+## Using the Dashboard
+
+1. Login with the credentials above.
+2. Select a date to view email threads for that day.
+3. Use search and filters to find specific threads.
+4. Click "View Details" on a thread to see messages and extractions.
+
+## How the Workflow Works
+
+The n8n workflow uses official Gmail nodes:
+
+1. **Gmail Trigger**: Monitors your Gmail inbox for new emails
+2. **Function Nodes**: Extract and parse email content
+3. **Chat OpenAI**: Classifies emails and extracts structured data
+4. **Postgres**: Stores data in the database
+5. **Gmail Send**: Sends automated replies
+
+## Monitoring
+
+- Health checks: All services have health checks defined.
+- Metrics: Server exposes `/metrics` endpoint for basic stats.
+- Logs: Check `docker logs <service_name>`.
+
+1. Access n8n at http://localhost:5678
+2. Import the workflow from workflows/email_automations.json
+3. Configure nodes:
+   - IMAP Email node: Set credentials for reading emails
+   - AI Classification node: Choose your preferred AI model
+   - Database nodes: Ensure connection to Postgres
+   - SMTP node: Configure for sending replies
+
+## Example Usage
+
+### Example 1: Basic Email Processing
+1. Send an email to your configured account with subject "Project Inquiry"
+2. The system will:
+   - Classify it as "business"
+   - Extract key information (budget, timeline, etc.)
+   - Store in database
+   - Generate and send an automated reply
+
+### Example 2: Custom Workflow
+Modify the n8n workflow to:
+- Add conditional logic based on email content
+- Integrate with external APIs
+- Send notifications to Slack or other services
+
+### Example 3: Monitoring
+- Check /metrics endpoint for system stats
+- View logs with docker logs <service_name>
+- Use health checks to ensure services are running
+
+## Troubleshooting
+
+- If services don't start: Check .env file and Docker logs
+- If login fails: Verify JWT_SECRET is set
+- If emails not processing: Check IMAP credentials and n8n workflow
+- If AI not working: Verify API keys and model availability
+
+## Security Notes
+
+- Change default login credentials in production
+- Use strong JWT_SECRET
+- Store secrets securely (not in .env for production)
+- Enable HTTPS in production
+
+## Support
+
+For issues, check Docker logs and ensure all environment variables are set correctly.

@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json tsconfig.json ./
+RUN npm install
+
+# Install TypeScript and curl for health checks
+RUN npm install -g typescript && apk add --no-cache curl
+
+COPY src ./src
+
+RUN npm run build
+
+EXPOSE 4000
+
+CMD ["npm", "start"]
