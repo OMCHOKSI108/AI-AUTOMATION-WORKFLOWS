@@ -1,0 +1,275 @@
+{
+ "name": "Multi model RAG choksi",
+ "type": "bot_chat",
+ "id": 8365945256,
+ "messages": [
+  {
+   "id": 13411,
+   "type": "message",
+   "date": "2025-12-06T19:34:37",
+   "date_unixtime": "1765029877",
+   "from": "OM CHOKSI🍅🐈‍⬛️Ⓜ️ MEMES",
+   "from_id": "user6113155394",
+   "text": "hello , can you give me patient's name in list format ??",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "hello , can you give me patient's name in list format ??"
+    }
+   ]
+  },
+  {
+   "id": 13413,
+   "type": "message",
+   "date": "2025-12-06T19:38:18",
+   "date_unixtime": "1765030098",
+   "from": "Multi model RAG choksi",
+   "from_id": "user8365945256",
+   "text": [
+    "Here are the patient names:\n\n",
+    {
+     "type": "bold",
+     "text": "   PATIENT1\n"
+    },
+    "   Ayesha Khan\n",
+    {
+     "type": "bold",
+     "text": "   Priya Sharma\n"
+    },
+    "   Rohit Verma\n",
+    {
+     "type": "bold",
+     "text": "   Kavya Iyer\n"
+    },
+    "   Gopal Reddy"
+   ],
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Here are the patient names:\n\n"
+    },
+    {
+     "type": "bold",
+     "text": "   PATIENT1\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Ayesha Khan\n"
+    },
+    {
+     "type": "bold",
+     "text": "   Priya Sharma\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Rohit Verma\n"
+    },
+    {
+     "type": "bold",
+     "text": "   Kavya Iyer\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Gopal Reddy"
+    }
+   ]
+  },
+  {
+   "id": 13414,
+   "type": "message",
+   "date": "2025-12-06T19:38:50",
+   "date_unixtime": "1765030130",
+   "from": "OM CHOKSI🍅🐈‍⬛️Ⓜ️ MEMES",
+   "from_id": "user6113155394",
+   "text": "tell me about Mr. Reddy",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "tell me about Mr. Reddy"
+    }
+   ]
+  },
+  {
+   "id": 13415,
+   "type": "message",
+   "date": "2025-12-06T19:39:16",
+   "date_unixtime": "1765030156",
+   "from": "Multi model RAG choksi",
+   "from_id": "user8365945256",
+   "text": "Mr. Reddy, whose full name is Gopal Reddy, is a 53-year-old male with a date of birth of April 22, 1972. His blood type is O-. He has a patient ID of IND-2025-0009 and MRN 100009. He is covered by a State government employee scheme for insurance.\n\nHis medical history includes hypertension and dyslipidemia. He recently presented with exertional central chest heaviness radiating to his left arm for the past month. These symptoms typically subside with rest in 5–10 minutes. He has not experienced rest pain or syncope, but he does have a strong family history of early heart disease. This information is from his patient medical record at Bharat Care Hospital, Department of Internal Medicine.",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Mr. Reddy, whose full name is Gopal Reddy, is a 53-year-old male with a date of birth of April 22, 1972. His blood type is O-. He has a patient ID of IND-2025-0009 and MRN 100009. He is covered by a State government employee scheme for insurance.\n\nHis medical history includes hypertension and dyslipidemia. He recently presented with exertional central chest heaviness radiating to his left arm for the past month. These symptoms typically subside with rest in 5–10 minutes. He has not experienced rest pain or syncope, but he does have a strong family history of early heart disease. This information is from his patient medical record at Bharat Care Hospital, Department of Internal Medicine."
+    }
+   ]
+  },
+  {
+   "id": 13422,
+   "type": "message",
+   "date": "2025-12-06T19:46:24",
+   "date_unixtime": "1765030584",
+   "from": "OM CHOKSI🍅🐈‍⬛️Ⓜ️ MEMES",
+   "from_id": "user6113155394",
+   "file": "files/AI (2).pdf",
+   "file_name": "AI (2).pdf",
+   "file_size": 66193,
+   "mime_type": "application/pdf",
+   "text": "can you give me summary of this pdf",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "can you give me summary of this pdf"
+    }
+   ]
+  },
+  {
+   "id": 13423,
+   "type": "message",
+   "date": "2025-12-06T19:46:47",
+   "date_unixtime": "1765030607",
+   "from": "Multi model RAG choksi",
+   "from_id": "user8365945256",
+   "text": [
+    "This group discussion script, titled \"Artificial Intelligence — Humanity’s Greatest Ally or Biggest Threat?\", held on July 28, 2025, covers various aspects of AI's impact.\n\nKey discussion points include:\n\n",
+    {
+     "type": "bold",
+     "text": "   Economic and Productivity Impact: AI threatens 40 million jobs in India by 2025 (WEF 2025) and has led to layoffs (e.g., TechSol BPO laid off 1,200 employees in 2024). However, AI is also projected to create 15 million AI-related jobs by 2030 (NASSCOM 2025), with a 20% growth in AI job postings in 2024 (Stanford AI Index 2025). Training is crucial for workers to transition. A concern raised is the high CO2 emissions from training AI models, equivalent to 496 people's yearly emissions (Environmental Impact Study 2025).\n"
+    },
+    "   Social and Ethical Implications: AI exhibits biases, with examples like an AI loan app denying loans based on pin codes (RBI 2024). There's significant public distrust, with 79% of people not trusting companies with AI and 80% fearing AI cyberattacks (DigitalOcean 2025). AI-generated fake news can divide society, and AI content filters have been linked to a 35% rise in teen anxiety (NIMHANS 2025). Rural internet access remains low at 2% (NSSO 2025), highlighting inequality. Conversely, AI can detect fake news with 85% accuracy (Technology Review 2025).\n",
+    {
+     "type": "bold",
+     "text": "   AI in Agriculture: AI tools like KisanAI can boost crop yields by 22% (Agricultural Technology Report 2025) by predicting weather and pests. However, there are risks, with 35% of farmers worrying about AI failures in bad weather, potentially leading to $500 million in crop losses (Agricultural Technology Report 2025).\n"
+    },
+    "   AI’s Environmental and Sustainability Challenges: Training one AI model can generate 8,930 tonnes of CO2 (Environmental Impact Study 2025). AI data centers consume 4% of global power (Environmental Impact Study 2025). On the positive side, AI can cut factory emissions by 15% and optimize energy use (Sustainability Journal 2025), with 60% of AI firms planning to use renewable energy.\n",
+    {
+     "type": "bold",
+     "text": "   Regulation and Future Outlook: There's a concern about AI in fake political ads (74% fear, Technology Review 2025), and a need for stronger global regulations, similar to the EU's AI Act. AI costs have dropped significantly (280 times in 2025, AI Economics Study 2025), making cheap AI accessible. 86% of companies follow AI rules (Stanford AI Index 2025), indicating a willingness for compliance.\n"
+    },
+    "   Conclusion: The discussion highlights AI's potential benefits, including a $4.4 trillion economic impact, 98% accuracy in healthcare (Medical AI Review 2025), and 22% higher crop yields. However, it also acknowledges risks such as job threats, distrust, and high energy consumption. The overarching conclusion is that AI is not inherently a threat; rather, the issues stem from poor regulation, lack of transparency, and unequal access. Smart governance can ensure ethical and inclusive use of AI (Stanford AI Index 2025)."
+   ],
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "This group discussion script, titled \"Artificial Intelligence — Humanity’s Greatest Ally or Biggest Threat?\", held on July 28, 2025, covers various aspects of AI's impact.\n\nKey discussion points include:\n\n"
+    },
+    {
+     "type": "bold",
+     "text": "   Economic and Productivity Impact: AI threatens 40 million jobs in India by 2025 (WEF 2025) and has led to layoffs (e.g., TechSol BPO laid off 1,200 employees in 2024). However, AI is also projected to create 15 million AI-related jobs by 2030 (NASSCOM 2025), with a 20% growth in AI job postings in 2024 (Stanford AI Index 2025). Training is crucial for workers to transition. A concern raised is the high CO2 emissions from training AI models, equivalent to 496 people's yearly emissions (Environmental Impact Study 2025).\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Social and Ethical Implications: AI exhibits biases, with examples like an AI loan app denying loans based on pin codes (RBI 2024). There's significant public distrust, with 79% of people not trusting companies with AI and 80% fearing AI cyberattacks (DigitalOcean 2025). AI-generated fake news can divide society, and AI content filters have been linked to a 35% rise in teen anxiety (NIMHANS 2025). Rural internet access remains low at 2% (NSSO 2025), highlighting inequality. Conversely, AI can detect fake news with 85% accuracy (Technology Review 2025).\n"
+    },
+    {
+     "type": "bold",
+     "text": "   AI in Agriculture: AI tools like KisanAI can boost crop yields by 22% (Agricultural Technology Report 2025) by predicting weather and pests. However, there are risks, with 35% of farmers worrying about AI failures in bad weather, potentially leading to $500 million in crop losses (Agricultural Technology Report 2025).\n"
+    },
+    {
+     "type": "plain",
+     "text": "   AI’s Environmental and Sustainability Challenges: Training one AI model can generate 8,930 tonnes of CO2 (Environmental Impact Study 2025). AI data centers consume 4% of global power (Environmental Impact Study 2025). On the positive side, AI can cut factory emissions by 15% and optimize energy use (Sustainability Journal 2025), with 60% of AI firms planning to use renewable energy.\n"
+    },
+    {
+     "type": "bold",
+     "text": "   Regulation and Future Outlook: There's a concern about AI in fake political ads (74% fear, Technology Review 2025), and a need for stronger global regulations, similar to the EU's AI Act. AI costs have dropped significantly (280 times in 2025, AI Economics Study 2025), making cheap AI accessible. 86% of companies follow AI rules (Stanford AI Index 2025), indicating a willingness for compliance.\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Conclusion: The discussion highlights AI's potential benefits, including a $4.4 trillion economic impact, 98% accuracy in healthcare (Medical AI Review 2025), and 22% higher crop yields. However, it also acknowledges risks such as job threats, distrust, and high energy consumption. The overarching conclusion is that AI is not inherently a threat; rather, the issues stem from poor regulation, lack of transparency, and unequal access. Smart governance can ensure ethical and inclusive use of AI (Stanford AI Index 2025)."
+    }
+   ]
+  },
+  {
+   "id": 13424,
+   "type": "message",
+   "date": "2025-12-06T19:47:33",
+   "date_unixtime": "1765030653",
+   "from": "OM CHOKSI🍅🐈‍⬛️Ⓜ️ MEMES",
+   "from_id": "user6113155394",
+   "file": "voice_messages/audio_1@06-12-2025_19-47-33.ogg",
+   "file_size": 29299,
+   "media_type": "voice_message",
+   "mime_type": "audio/ogg",
+   "duration_seconds": 7,
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 13425,
+   "type": "message",
+   "date": "2025-12-06T19:47:49",
+   "date_unixtime": "1765030669",
+   "from": "Multi model RAG choksi",
+   "from_id": "user8365945256",
+   "text": "This is NATE-10 multimodal RAG-based chat model, which chatbot.\n\nThe voice is introducing a multimodal, RAG-based chat model called NATE-10, clarifying it's a chatbot.",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "This is NATE-10 multimodal RAG-based chat model, which chatbot.\n\nThe voice is introducing a multimodal, RAG-based chat model called NATE-10, clarifying it's a chatbot."
+    }
+   ]
+  },
+  {
+   "id": 13426,
+   "type": "message",
+   "date": "2025-12-06T19:48:22",
+   "date_unixtime": "1765030702",
+   "from": "OM CHOKSI🍅🐈‍⬛️Ⓜ️ MEMES",
+   "from_id": "user6113155394",
+   "photo": "photos/photo_1@06-12-2025_19-48-22.jpg",
+   "photo_file_size": 104017,
+   "width": 1280,
+   "height": 647,
+   "text": "what is this image ??",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "what is this image ??"
+    }
+   ]
+  },
+  {
+   "id": 13428,
+   "type": "message",
+   "date": "2025-12-06T19:49:59",
+   "date_unixtime": "1765030799",
+   "from": "Multi model RAG choksi",
+   "from_id": "user8365945256",
+   "text": [
+    "The image displays a screenshot of a digital interface, likely a web application or software dashboard, with a structured layout and a light color scheme with blue/teal accents.\n\nHere's a breakdown of its contents based on your description:\n\n",
+    {
+     "type": "bold",
+     "text": "   Top Banner (Header): A horizontal blue-teal bar at the top, likely containing the application title/logo on the left and user-related icons/controls on the right, including a small \"x\" icon.\n"
+    },
+    "   Left Sidebar (Navigation Menu): A vertical panel with a light grey/off-white background, listing menu items with icons and text such as \"Dashboard,\" \"Products,\" \"Orders,\" and \"Customers.\" A yellow vertical bar indicates the currently active section, possibly \"Reports\" or \"Analytics,\" and \"Settings\" is also visible.\n",
+    {
+     "type": "bold",
+     "text": "   Main Content Area (Central Panel): The largest section, showing what appears to be a data table or list. It has an unreadable heading, a search bar, and potentially an \"Add New\" or \"Create\" button. The primary element is a grid-like table with numerous columns and rows of alphanumeric data, representing records. A vertical scrollbar suggests more records are present.\n"
+    },
+    "   Right Sidebar/Panel: A narrower vertical panel likely containing filter options or detailed information for a selected record. It appears to have input fields or dropdown menus for refining data and possibly action buttons like \"Apply Filters\" or \"Save.\"\n\nOverall, the interface presents a typical administrative or data management system designed for viewing, searching, and potentially editing records."
+   ],
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "The image displays a screenshot of a digital interface, likely a web application or software dashboard, with a structured layout and a light color scheme with blue/teal accents.\n\nHere's a breakdown of its contents based on your description:\n\n"
+    },
+    {
+     "type": "bold",
+     "text": "   Top Banner (Header): A horizontal blue-teal bar at the top, likely containing the application title/logo on the left and user-related icons/controls on the right, including a small \"x\" icon.\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Left Sidebar (Navigation Menu): A vertical panel with a light grey/off-white background, listing menu items with icons and text such as \"Dashboard,\" \"Products,\" \"Orders,\" and \"Customers.\" A yellow vertical bar indicates the currently active section, possibly \"Reports\" or \"Analytics,\" and \"Settings\" is also visible.\n"
+    },
+    {
+     "type": "bold",
+     "text": "   Main Content Area (Central Panel): The largest section, showing what appears to be a data table or list. It has an unreadable heading, a search bar, and potentially an \"Add New\" or \"Create\" button. The primary element is a grid-like table with numerous columns and rows of alphanumeric data, representing records. A vertical scrollbar suggests more records are present.\n"
+    },
+    {
+     "type": "plain",
+     "text": "   Right Sidebar/Panel: A narrower vertical panel likely containing filter options or detailed information for a selected record. It appears to have input fields or dropdown menus for refining data and possibly action buttons like \"Apply Filters\" or \"Save.\"\n\nOverall, the interface presents a typical administrative or data management system designed for viewing, searching, and potentially editing records."
+    }
+   ]
+  }
+ ]
+}
