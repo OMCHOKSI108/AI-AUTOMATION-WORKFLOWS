@@ -44,10 +44,16 @@ The agent is designed to be deployed easily using Docker, with webhook support v
   <img src="assets/teleghram_chat2.png" alt="Telegram chat screenshot 2" width="380" />
 </p>
 
-### Live Demo (GIF)
+### Live Demo (YouTube)
 
 <p align="center">
-  <img src="assets/Demo.gif" alt="Multi-Modal RAG Agent demo" width="800" />
+  <a href="https://youtu.be/9IqJ4VvRxxE" target="_blank">
+    <img src="https://img.youtube.com/vi/9IqJ4VvRxxE/maxresdefault.jpg" alt="Multi-Modal RAG Agent YouTube Demo" width="800" />
+  </a>
+</p>
+
+<p align="center">
+  ▶️ <a href="https://youtu.be/9IqJ4VvRxxE" target="_blank">Watch the full demo on YouTube</a>
 </p>
 
 ## Telegram ChatHistory :
