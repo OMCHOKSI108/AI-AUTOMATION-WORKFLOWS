@@ -1,0 +1,694 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"You are a Research Intelligence Agent. Generate comprehensive academic search keywords. Output ONLY valid JSON.\"},\n    {\"role\": \"user\", \"content\": \"Generate keywords for: {{ $json.topic }}\\n\\nOutput JSON: {\\\"primaryKeywords\\\": [...], \\\"secondaryKeywords\\\": [...], \\\"synonyms\\\": [...], \\\"searchQueries\\\": [...]}\"}\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 1000\n}",
+        "options": {}
+      },
+      "id": "ce84ca71-ed87-45c1-8f96-af8cc7aa42ec",
+      "name": "Agent 1: Keywords [GROQ]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5584,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyB9w5E1wg6YhcEDTGpS4qnodUoca_NhMY4",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"You are a Literature Review Agent. Analyze literature and identify research gaps.\\n\\nTopic: {{ $json.topic }}\\n\\nLiterature found:\\n{{ JSON.stringify($json.artifacts.literature) }}\\n\\nProvide in markdown:\\n1. Key Themes\\n2. Current State\\n3. Research Gaps\\n4. Potential Contributions\"\n    }]\n  }],\n  \"generationConfig\": { \"temperature\": 0.4, \"maxOutputTokens\": 2000 }\n}",
+        "options": {}
+      },
+      "id": "b9e83e95-6785-407a-b2f3-708e5514915d",
+      "name": "Agent 2: Literature [GEMINI]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6464,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"You are a Research Strategist. Formulate research gaps, problem statement, questions, and objectives.\"\n    },\n    {\n      role: \"user\",\n      content:\n        \"Topic: \" + $json.topic + \"\\n\\n\" +\n        \"Literature Review:\\n\" + $json.artifacts.literatureReview + \"\\n\\n\" +\n        \"Formulate:\\n\" +\n        \"1. Research Gap Statement\\n\" +\n        \"2. Problem Statement\\n\" +\n        \"3. Research Questions (3-5)\\n\" +\n        \"4. Research Objectives\"\n    }\n  ],\n  temperature: 0.3,\n  max_tokens: 1500\n}) }}\n",
+        "options": {}
+      },
+      "id": "eea4ea1b-a1b9-4559-90fe-adb97a276d75",
+      "name": "Agent 3: Strategy [GROQ]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5792,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAMqd41bOlRO28vgThLt2bhcbuRfpr6qgY",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text:\n        \"You are a Methodology Architect. Design comprehensive research methodology.\\n\\n\" +\n        \"Topic: \" + $json.topic + \"\\n\\n\" +\n        \"Research Strategy:\\n\" + $json.artifacts.gaps + \"\\n\\n\" +\n        \"Design methodology:\\n\" +\n        \"1. Research Design\\n\" +\n        \"2. Data Collection Methods\\n\" +\n        \"3. Analysis Techniques\\n\" +\n        \"4. Validation Approach\\n\" +\n        \"5. Ethical Considerations\"\n    }]\n  }],\n  generationConfig: {\n    temperature: 0.4,\n    maxOutputTokens: 2000\n  }\n}) }}\n",
+        "options": {}
+      },
+      "id": "550ccd1c-4812-40f0-9a11-07919d55968a",
+      "name": "Agent 4: Methodology [GEMINI]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6240,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"You are an Implementation Designer. Create data and implementation plans.\"\n    },\n    {\n      role: \"user\",\n      content:\n        \"Topic: \" + $json.topic + \"\\n\\n\" +\n        \"Methodology:\\n\" + $json.artifacts.methodology + \"\\n\\n\" +\n        \"Create:\\n\" +\n        \"1. Dataset Requirements\\n\" +\n        \"2. Data Sources\\n\" +\n        \"3. Preprocessing Steps\\n\" +\n        \"4. Implementation Architecture\\n\" +\n        \"5. Code Skeleton\\n\" +\n        \"6. Reproducibility Checklist\"\n    }\n  ],\n  temperature: 0.3,\n  max_tokens: 2500\n}) }}\n",
+        "options": {}
+      },
+      "id": "05c390ee-92d1-4067-88b7-30e0cd1cd6e6",
+      "name": "Agent 5: Implementation [GROQ]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5584,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAMqd41bOlRO28vgThLt2bhcbuRfpr6qgY",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text:\n        \"You are an Experiment Designer. Design experimental framework.\\n\\n\" +\n        \"Topic: \" + $json.topic + \"\\n\\n\" +\n        \"Implementation:\\n\" + $json.artifacts.datasetPlan + \"\\n\\n\" +\n        \"Design:\\n\" +\n        \"1. Experiment Design\\n\" +\n        \"2. Evaluation Metrics\\n\" +\n        \"3. Benchmarks\\n\" +\n        \"4. Statistical Tests\\n\" +\n        \"5. Expected Results Format\\n\" +\n        \"6. Discussion Points\"\n    }]\n  }],\n  generationConfig: {\n    temperature: 0.4,\n    maxOutputTokens: 2000\n  }\n}) }}\n",
+        "options": {}
+      },
+      "id": "663907e2-7a16-4e29-b6c1-0be0cc8e065a",
+      "name": "Agent 6: Experiments [GEMINI]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6032,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"llama-3.3-70b-versatile\",\n  messages: [\n    {\n      role: \"system\",\n      content: \"You are a Quality Reviewer. Review research for novelty, ethics, reproducibility.\"\n    },\n    {\n      role: \"user\",\n      content:\n        \"Review this research plan:\\n\" +\n        \"Topic: \" + $json.topic + \"\\n\" +\n        \"Literature: \" + $json.artifacts.literatureReview + \"\\n\" +\n        \"Strategy: \" + $json.artifacts.gaps + \"\\n\" +\n        \"Methodology: \" + $json.artifacts.methodology + \"\\n\" +\n        \"Implementation: \" + $json.artifacts.datasetPlan + \"\\n\" +\n        \"Experiments: \" + $json.artifacts.results + \"\\n\\n\" +\n        \"Provide:\\n\" +\n        \"1. Novelty Score (1-10)\\n\" +\n        \"2. Ethical Concerns\\n\" +\n        \"3. Reproducibility Assessment\\n\" +\n        \"4. Limitations\\n\" +\n        \"5. Recommendations\"\n    }\n  ],\n  temperature: 0.3,\n  max_tokens: 1500\n}) }}\n",
+        "options": {}
+      },
+      "id": "fd9066f5-a178-4245-8a48-70af094e1767",
+      "name": "Agent 7: Quality [GROQ]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6464,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAMqd41bOlRO28vgThLt2bhcbuRfpr6qgY",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [{\n    parts: [{\n      text:\n        \"You are an Academic Paper Compiler. Generate a complete IEEE-format research paper.\\n\\n\" +\n        \"Compile a complete research paper for: \" + $json.topic + \"\\n\\n\" +\n        \"Literature Review:\\n\" + $json.artifacts.literatureReview + \"\\n\\n\" +\n        \"Research Strategy:\\n\" + $json.artifacts.gaps + \"\\n\\n\" +\n        \"Methodology:\\n\" + $json.artifacts.methodology + \"\\n\\n\" +\n        \"Implementation:\\n\" + $json.artifacts.datasetPlan + \"\\n\\n\" +\n        \"Experiments:\\n\" + $json.artifacts.results + \"\\n\\n\" +\n        \"Quality Assessment:\\n\" + $json.artifacts.analysis + \"\\n\\n\" +\n        \"Generate complete paper with: Title, Abstract, Introduction, Literature Review, Methodology, Implementation, Results, Discussion, Conclusion, References.\"\n    }]\n  }],\n  generationConfig: {\n    temperature: 0.5,\n    maxOutputTokens: 8000\n  }\n}) }}\n",
+        "options": {}
+      },
+      "id": "b12cfeba-251c-4de2-bdaf-bd29121f25a9",
+      "name": "Agent 8: Paper [GEMINI-PRO]",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5792,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Quality1').first().json;\nconst response = $input.first().json;\nconst paperContent = response.candidates?.[0]?.content?.parts?.[0]?.text || '';\n\nstate.artifacts.finalPaper = paperContent;\nstate.currentPhase = 'paper_complete';\nstate.agentLogs.push({ agent: 'Agent 8', status: 'done', model: 'Gemini Pro' });\nstate.modelsUsed.push('Gemini Pro');\n\nreturn [{ json: state }];"
+      },
+      "id": "4800963e-7436-4381-8d1d-1acd827e7ffb",
+      "name": "Process Paper",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6016,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate PDF-ready HTML from Markdown\nconst state = $input.first().json;\nconst markdown = state.artifacts.finalPaper;\nconst topic = state.topic;\nconst date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });\n\n// Simple markdown to HTML conversion\nfunction mdToHtml(md) {\n  return md\n    .replace(/^### (.*$)/gim, '<h3>$1</h3>')\n    .replace(/^## (.*$)/gim, '<h2>$1</h2>')\n    .replace(/^# (.*$)/gim, '<h1>$1</h1>')\n    .replace(/\\*\\*(.*)\\*\\*/gim, '<strong>$1</strong>')\n    .replace(/\\*(.*)\\*/gim, '<em>$1</em>')\n    .replace(/^- (.*$)/gim, '<li>$1</li>')\n    .replace(/^\\d+\\. (.*$)/gim, '<li>$1</li>')\n    .replace(/```([\\s\\S]*?)```/gim, '<pre><code>$1</code></pre>')\n    .replace(/`([^`]+)`/gim, '<code>$1</code>')\n    .replace(/\\n/gim, '<br>');\n}\n\nconst htmlContent = mdToHtml(markdown);\n\nconst pdfHtml = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Research Paper: ${topic}</title>\n  <style>\n    @page { margin: 2cm; size: A4; }\n    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }\n    \n    * { box-sizing: border-box; }\n    \n    body {\n      font-family: 'Times New Roman', Times, serif;\n      font-size: 12pt;\n      line-height: 1.6;\n      color: #1a1a1a;\n      max-width: 800px;\n      margin: 0 auto;\n      padding: 40px;\n      background: white;\n    }\n    \n    .header {\n      text-align: center;\n      border-bottom: 2px solid #2563eb;\n      padding-bottom: 20px;\n      margin-bottom: 30px;\n    }\n    \n    .header h1 {\n      font-size: 24pt;\n      color: #1e3a5f;\n      margin-bottom: 10px;\n    }\n    \n    .header .meta {\n      font-size: 10pt;\n      color: #666;\n    }\n    \n    .badge {\n      display: inline-block;\n      background: linear-gradient(135deg, #2563eb, #7c3aed);\n      color: white;\n      padding: 4px 12px;\n      border-radius: 20px;\n      font-size: 9pt;\n      margin: 5px 2px;\n    }\n    \n    h1 { font-size: 18pt; color: #1e3a5f; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }\n    h2 { font-size: 14pt; color: #2563eb; margin-top: 25px; }\n    h3 { font-size: 12pt; color: #444; margin-top: 20px; }\n    \n    p, li { text-align: justify; }\n    \n    ul, ol { margin-left: 20px; }\n    li { margin-bottom: 5px; }\n    \n    pre {\n      background: #f5f5f5;\n      border: 1px solid #ddd;\n      border-radius: 4px;\n      padding: 15px;\n      overflow-x: auto;\n      font-family: 'Courier New', monospace;\n      font-size: 10pt;\n    }\n    \n    code {\n      background: #f0f0f0;\n      padding: 2px 6px;\n      border-radius: 3px;\n      font-family: 'Courier New', monospace;\n      font-size: 10pt;\n    }\n    \n    strong { color: #1e3a5f; }\n    \n    .footer {\n      margin-top: 50px;\n      padding-top: 20px;\n      border-top: 1px solid #ddd;\n      text-align: center;\n      font-size: 9pt;\n      color: #888;\n    }\n    \n    .print-btn {\n      position: fixed;\n      top: 20px;\n      right: 20px;\n      background: linear-gradient(135deg, #2563eb, #7c3aed);\n      color: white;\n      border: none;\n      padding: 12px 24px;\n      border-radius: 8px;\n      cursor: pointer;\n      font-size: 14px;\n      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);\n    }\n    \n    .print-btn:hover { transform: scale(1.05); }\n    \n    @media print { .print-btn { display: none; } }\n  </style>\n</head>\n<body>\n  <button class=\"print-btn\" onclick=\"window.print()\">📄 Save as PDF</button>\n  \n  <div class=\"header\">\n    <h1>Research Paper</h1>\n    <p style=\"font-size: 16pt; color: #333;\">${topic}</p>\n    <p class=\"meta\">Generated: ${date}</p>\n    <div>\n      <span class=\"badge\">🧠 Groq LLaMA 3.3</span>\n      <span class=\"badge\">✨ Gemini Pro</span>\n      <span class=\"badge\">🤖 8 AI Agents</span>\n    </div>\n  </div>\n  \n  <div class=\"content\">\n    ${htmlContent}\n  </div>\n  \n  <div class=\"footer\">\n    <p>Generated by Multi-Agent Research System v9 (Hybrid)</p>\n    <p>Powered by n8n • Groq LLaMA 3.3 • Google Gemini Pro</p>\n  </div>\n</body>\n</html>`;\n\nstate.artifacts.pdfHtml = pdfHtml;\nstate.currentPhase = 'pdf_ready';\nstate.endTime = new Date().toISOString();\n\nconst startTime = new Date(state.startTime);\nconst endTime = new Date(state.endTime);\nconst executionSeconds = Math.round((endTime - startTime) / 1000);\n\nreturn [{\n  json: {\n    success: true,\n    content: state.artifacts.finalPaper,\n    pdfHtml: pdfHtml,\n    metadata: {\n      topic: state.topic,\n      startTime: state.startTime,\n      endTime: state.endTime,\n      executionTimeSeconds: executionSeconds,\n      agentsExecuted: 8,\n      modelsUsed: ['Groq LLaMA 3.3', 'Gemini 1.5 Flash', 'Gemini 1.5 Pro'],\n      hybridMode: true\n    }\n  }\n}];"
+      },
+      "id": "0ad8f145-e1bc-44d0-bc03-19cae94eb84f",
+      "name": "Generate PDF HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6224,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "start-research",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b2e1dd60-1f56-422e-b47b-c3474b28c90a",
+      "name": "Webhook Trigger1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        5200,
+        944
+      ],
+      "webhookId": "start-research"
+    },
+    {
+      "parameters": {
+        "jsCode": "const topic = $input.first().json.body?.topic || $input.first().json.topic;\n\nif (!topic || topic.trim().length < 3) {\n  throw new Error('Invalid topic: Please provide a research topic with at least 3 characters');\n}\n\nconst researchState = {\n  topic: topic.trim(),\n  startTime: new Date().toISOString(),\n  currentPhase: 'initialization',\n  artifacts: {\n    keywords: [],\n    literature: [],\n    literatureReview: '',\n    gaps: '',\n    methodology: '',\n    datasetPlan: '',\n    results: '',\n    analysis: '',\n    finalPaper: '',\n    pdfHtml: ''\n  },\n  agentLogs: [],\n  modelsUsed: []\n};\n\nreturn [{ json: researchState }];"
+      },
+      "id": "b520a6e1-daf4-4cb4-af6e-583f4672fd98",
+      "name": "Initialize State1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5104,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Initialize State1').first().json;\nconst response = $input.first().json;\nconst content = response.choices?.[0]?.message?.content || '';\n\nlet keywords;\ntry {\n  const jsonMatch = content.match(/\\{[\\s\\S]*\\}/);\n  keywords = jsonMatch ? JSON.parse(jsonMatch[0]) : {\n    primaryKeywords: [state.topic],\n    searchQueries: [state.topic + ' research']\n  };\n} catch (e) {\n  keywords = { primaryKeywords: [state.topic], searchQueries: [state.topic + ' research'] };\n}\n\nstate.artifacts.keywords = keywords;\nstate.currentPhase = 'keywords_complete';\nstate.agentLogs.push({ agent: 'Agent 1', status: 'done', model: 'Groq LLaMA' });\nstate.modelsUsed.push('Groq');\n\nreturn [{ json: state }];"
+      },
+      "id": "b2dbe304-8af5-43ba-b0e1-b30d428d26b3",
+      "name": "Parse Keywords1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5808,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.duckduckgo.com/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.artifacts.keywords.searchQueries?.[0] || $json.topic }} research paper"
+            },
+            {
+              "name": "format",
+              "value": "json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6ef9e639-161a-40e6-a00c-53c16e77dc33",
+      "name": "Web Search1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6016,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Parse Keywords1').first().json;\nconst searchResponse = $input.first().json;\n\nconst results = searchResponse.RelatedTopics || [];\nstate.artifacts.literature = results.slice(0, 8).map((item, idx) => ({\n  id: idx + 1,\n  text: item.Text || '',\n  url: item.FirstURL || ''\n}));\nstate.currentPhase = 'search_complete';\nstate.agentLogs.push({ agent: 'Web Search', status: 'done' });\n\nreturn [{ json: state }];"
+      },
+      "id": "805e42bd-7206-4713-8bd7-6cfbacc1195a",
+      "name": "Process Search1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6240,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Search1').first().json;\nconst response = $input.first().json;\nstate.artifacts.literatureReview = response.candidates?.[0]?.content?.parts?.[0]?.text || '';\nstate.currentPhase = 'literature_complete';\nstate.agentLogs.push({ agent: 'Agent 2', status: 'done', model: 'Gemini' });\nstate.modelsUsed.push('Gemini');\nreturn [{ json: state }];"
+      },
+      "id": "dd2dd37b-12be-4c15-a1e4-d25a271f45a7",
+      "name": "Process Literature1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5584,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Literature1').first().json;\nconst response = $input.first().json;\nstate.artifacts.gaps = response.choices?.[0]?.message?.content || '';\nstate.currentPhase = 'strategy_complete';\nstate.agentLogs.push({ agent: 'Agent 3', status: 'done', model: 'Groq LLaMA' });\nstate.modelsUsed.push('Groq');\nreturn [{ json: state }];"
+      },
+      "id": "aa15a08f-9ee5-4450-8fef-3922c38c64cf",
+      "name": "Process Strategy1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6016,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Strategy1').first().json;\nconst response = $input.first().json;\nstate.artifacts.methodology = response.candidates?.[0]?.content?.parts?.[0]?.text || '';\nstate.currentPhase = 'methodology_complete';\nstate.agentLogs.push({ agent: 'Agent 4', status: 'done', model: 'Gemini' });\nstate.modelsUsed.push('Gemini');\nreturn [{ json: state }];"
+      },
+      "id": "c5a716a6-838d-4f91-bc5e-e9c2fe08d4a3",
+      "name": "Process Methodology1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6464,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Methodology1').first().json;\nconst response = $input.first().json;\nstate.artifacts.datasetPlan = response.choices?.[0]?.message?.content || '';\nstate.currentPhase = 'implementation_complete';\nstate.agentLogs.push({ agent: 'Agent 5', status: 'done', model: 'Groq LLaMA' });\nstate.modelsUsed.push('Groq');\nreturn [{ json: state }];"
+      },
+      "id": "659accdb-e02b-42a7-9254-c56d7f4a8857",
+      "name": "Process Implementation1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5808,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Implementation1').first().json;\nconst response = $input.first().json;\nstate.artifacts.results = response.candidates?.[0]?.content?.parts?.[0]?.text || '';\nstate.currentPhase = 'experiments_complete';\nstate.agentLogs.push({ agent: 'Agent 6', status: 'done', model: 'Gemini' });\nstate.modelsUsed.push('Gemini');\nreturn [{ json: state }];"
+      },
+      "id": "0e155d9d-4e3a-4698-9596-b8f2423ed710",
+      "name": "Process Experiments1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6256,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Process Experiments1').first().json;\nconst response = $input.first().json;\nstate.artifacts.analysis = response.choices?.[0]?.message?.content || '';\nstate.currentPhase = 'quality_complete';\nstate.agentLogs.push({ agent: 'Agent 7', status: 'done', model: 'Groq LLaMA' });\nstate.modelsUsed.push('Groq');\nreturn [{ json: state }];"
+      },
+      "id": "2831b605-c187-4509-9fea-7ede4fbb9fcd",
+      "name": "Process Quality1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5568,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "267bd422-4607-4529-b5da-9a34d4fc3b79",
+      "name": "Respond1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        6448,
+        1200
+      ]
+    }
+  ],
+  "connections": {
+    "Agent 1: Keywords [GROQ]": {
+      "main": [
+        [
+          {
+            "node": "Parse Keywords1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 2: Literature [GEMINI]": {
+      "main": [
+        [
+          {
+            "node": "Process Literature1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 3: Strategy [GROQ]": {
+      "main": [
+        [
+          {
+            "node": "Process Strategy1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 4: Methodology [GEMINI]": {
+      "main": [
+        [
+          {
+            "node": "Process Methodology1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 5: Implementation [GROQ]": {
+      "main": [
+        [
+          {
+            "node": "Process Implementation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 6: Experiments [GEMINI]": {
+      "main": [
+        [
+          {
+            "node": "Process Experiments1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 7: Quality [GROQ]": {
+      "main": [
+        [
+          {
+            "node": "Process Quality1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent 8: Paper [GEMINI-PRO]": {
+      "main": [
+        [
+          {
+            "node": "Process Paper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Paper": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF HTML": {
+      "main": [
+        [
+          {
+            "node": "Respond1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Initialize State1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize State1": {
+      "main": [
+        [
+          {
+            "node": "Agent 1: Keywords [GROQ]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Keywords1": {
+      "main": [
+        [
+          {
+            "node": "Web Search1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Search1": {
+      "main": [
+        [
+          {
+            "node": "Process Search1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Search1": {
+      "main": [
+        [
+          {
+            "node": "Agent 2: Literature [GEMINI]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Literature1": {
+      "main": [
+        [
+          {
+            "node": "Agent 3: Strategy [GROQ]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Strategy1": {
+      "main": [
+        [
+          {
+            "node": "Agent 4: Methodology [GEMINI]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Methodology1": {
+      "main": [
+        [
+          {
+            "node": "Agent 5: Implementation [GROQ]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Implementation1": {
+      "main": [
+        [
+          {
+            "node": "Agent 6: Experiments [GEMINI]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Experiments1": {
+      "main": [
+        [
+          {
+            "node": "Agent 7: Quality [GROQ]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Quality1": {
+      "main": [
+        [
+          {
+            "node": "Agent 8: Paper [GEMINI-PRO]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4a832bd05f70e93674bf245e3d26124a505300f87e86e59f3891e21de20ac6c2"
+  }
+}
