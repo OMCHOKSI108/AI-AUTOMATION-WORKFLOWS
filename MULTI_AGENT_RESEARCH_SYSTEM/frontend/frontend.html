@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Agent Frontend</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        input, button { padding: 10px; margin: 10px 0; }
+        input { width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #output { margin-top: 20px; border: 1px solid #ddd; padding: 10px; }
+        .metadata { background: #f9f9f9; padding: 10px; margin: 10px 0; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Research Agent</h1>
+    <form id="researchForm">
+        <input type="text" id="topicInput" placeholder="Enter research topic" required>
+        <button type="submit" id="submitBtn">Start Research</button>
+    </form>
+    <div id="loading" style="display: none;">Processing... This may take 2-3 minutes.</div>
+    <div id="output" style="display: none;">
+        <h2>Research Paper</h2>
+        <div id="content"></div>
+        <div class="metadata" id="metadata"></div>
+        <button id="pdfBtn">Export as PDF</button>
+    </div>
+    <div id="error" class="error" style="display: none;"></div>
+
+    <script>
+        const form = document.getElementById('researchForm');
+        const topicInput = document.getElementById('topicInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const output = document.getElementById('output');
+        const contentDiv = document.getElementById('content');
+        const metadataDiv = document.getElementById('metadata');
+        const pdfBtn = document.getElementById('pdfBtn');
+        const errorDiv = document.getElementById('error');
+
+        let responseData = null;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = topicInput.value.trim();
+            if (!topic) return;
+
+            // Reset UI
+            output.style.display = 'none';
+            errorDiv.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5678/webhook-test/start-research', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                responseData = await response.json();
+
+                if (responseData.success) {
+                    contentDiv.innerHTML = marked.parse(responseData.content);
+                    metadataDiv.innerHTML = `
+                        <h3>Metadata</h3>
+                        <p><strong>Topic:</strong> ${responseData.metadata.topic}</p>
+                        <p><strong>Execution Time:</strong> ${responseData.metadata.executionTimeSeconds}s</p>
+                        <p><strong>Agents Executed:</strong> ${responseData.metadata.agentsExecuted}</p>
+                        <p><strong>Models Used:</strong> ${responseData.metadata.modelsUsed.join(', ')}</p>
+                        <p><strong>Hybrid Mode:</strong> ${responseData.metadata.hybridMode ? 'Yes' : 'No'}</p>
+                    `;
+                    output.style.display = 'block';
+                } else {
+                    throw new Error('Request failed');
+                }
+            } catch (err) {
+                errorDiv.textContent = `Error: ${err.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        pdfBtn.addEventListener('click', () => {
+            if (!responseData || !responseData.pdfHtml) {
+                alert('No PDF HTML available');
+                return;
+            }
+
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(responseData.pdfHtml);
+            newWindow.document.close();
+        });
+    </script>
+</body>
+</html>
