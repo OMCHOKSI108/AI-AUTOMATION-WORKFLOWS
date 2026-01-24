@@ -1,11 +1,25 @@
-# AI Agents Automation (n8n)
+# AI Automation Workflows (n8n)
 
-This repository will host an AI-powered Food Delivery Automation project built on n8n (workflow automation). The goal: run n8n locally (Docker), import the project's workflows, and connect AI agents for customer interaction (Telegram/WhatsApp) and Google Sheets.
+Collection of AI-powered automation workflows built on n8n, featuring web scraping, data processing, and AI agent integrations.
+
+## Projects
+
+### 🤖 AI Dataset Creator (`AI_READY_DATASET/`)
+Automated pipeline for creating AI training datasets from web content:
+- Web scraping with BrightData
+- AI-powered content extraction and formatting
+- Vector database storage with Pinecone
+- Web interface for easy dataset creation
+
+### 🍕 Food Delivery Automation (Legacy)
+- AI agents for customer interaction (Telegram/WhatsApp)
+- Google Sheets integration
+- Project demo video: `src/food_delivery_automation.mp4`
 
 ## What this repo contains
-- Project demo video: `src/food_delivery_automation.mp4` (download / external-host recommended)
-- n8n workflow(s) (importable JSON) — see `workflow.json` when added
-- Docker convenience files to run n8n locally: `docker-compose.yml` and `.env.example`
+- Multiple n8n workflow JSON files (importable)
+- Web interfaces and API servers
+- Docker convenience files: `docker-compose.yml` and `.env.example`
 
 ## Quick start — Docker Compose (recommended)
 
