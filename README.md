@@ -2,7 +2,7 @@
 
 Collection of AI-powered automation workflows built on n8n, featuring web scraping, data processing, and AI agent integrations.
 
-## 🚀 Projects Overview
+## Projects Overview
 
 | Project Name | Description | Category | Link |
 |-------------|-------------|----------|------|
@@ -25,37 +25,3 @@ docker-compose up -d
 ```
 
 3. Open the n8n editor at: http://localhost:5678
-
-## 📁 What this repo contains
-- Multiple n8n workflow JSON files (importable)
-- Web interfaces and API servers  
-- Docker convenience files: `docker-compose.yml` and `.env.example`
-- Comprehensive documentation for each project
-
-## 🛠️ Technologies Used
-- **n8n**: Workflow automation platform
-- **Ollama**: Local AI models (phi3:mini, llama3.2-vision)
-- **Docker**: Containerization and deployment
-- **Selenium**: Web browser automation
-- **Pinecone**: Vector database for embeddings
-- **BrightData**: Professional web scraping APIs
-- **PostgreSQL**: Database storage
-
-## Documentation Moved
-
-All markdown documentation has been relocated to the `docs/` directory for organization.
-
-### Quick Links
-- Main index: `docs/index.md`
-- Updated overview: `docs/DATA_CLEANING_WORKFLOW/README_new.md`
-- Production details: `docs/DATA_CLEANING_WORKFLOW/README_PRODUCTION.md`
-- Quick start: `docs/DATA_CLEANING_WORKFLOW/QUICKSTART.md`
-- API endpoints: `docs/api_endpoints.txt`
-
-### Legacy Blueprint
-Previous architecture blueprint retained at `docs/README_ROOT_LEGACY.md`.
-
-### Next Actions
-Consider merging duplicate READMEs and converting `api_endpoints.txt` to richer markdown.
-```
-

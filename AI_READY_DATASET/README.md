@@ -1,4 +1,4 @@
-# 🤖 AI-Powered Ultimate Web Scraper
+# AI-Powered Ultimate Web Scraper
 
 This advanced web scraping solution combines the power of Selenium browser automation with local AI models through Ollama, creating a sophisticated data extraction system that can intelligently analyze and extract information from any website. The workflow leverages computer vision and natural language processing to understand web content and extract structured data based on your specific requirements.
 
@@ -6,7 +6,7 @@ Built for scalability and privacy, this system eliminates the need for expensive
 
 The system is designed for both technical and non-technical users, offering a simple webhook interface for data extraction requests while providing the flexibility to handle complex scenarios like authentication, JavaScript-heavy sites, and dynamic content loading.
 
-## 🖼️ Workflow Screenshots
+## Workflow Screenshots
 
 ### Complete Workflow Overview
 ![Complete Workflow](Full.png)
@@ -24,20 +24,20 @@ The system is designed for both technical and non-technical users, offering a si
 ![Documentation](documenation_n8n.png)
 *n8n documentation and configuration interface*
 
-## ✨ Features
+## Features
 
-- **🧠 Local AI Processing**: Uses Ollama models (phi3:mini, llama3.2-vision) for intelligent content analysis
-- **🕷️ Advanced Web Scraping**: Selenium-based automation with anti-detection capabilities
-- **🔐 Authentication Support**: Cookie-based login and session management
-- **📱 Dynamic Content Handling**: JavaScript execution and AJAX content loading
-- **🛡️ Anti-Detection**: Browser fingerprint masking and human-like behavior simulation
-- **🔄 Flexible Data Extraction**: Custom data field specification with intelligent content matching
-- **📊 Structured Output**: JSON-formatted results ready for further processing
-- **🌐 Proxy Support**: Built-in proxy integration for large-scale scraping
-- **🖼️ Visual Analysis**: Screenshot-based content analysis for complex layouts
-- **⚡ Real-time Processing**: Instant webhook responses with live data extraction
+- **Local AI Processing**: Uses Ollama models (phi3:mini, llama3.2-vision) for intelligent content analysis
+- **Advanced Web Scraping**: Selenium-based automation with anti-detection capabilities
+- **Authentication Support**: Cookie-based login and session management
+- **Dynamic Content Handling**: JavaScript execution and AJAX content loading
+- **Anti-Detection**: Browser fingerprint masking and human-like behavior simulation
+- **Flexible Data Extraction**: Custom data field specification with intelligent content matching
+- **Structured Output**: JSON-formatted results ready for further processing
+- **Proxy Support**: Built-in proxy integration for large-scale scraping
+- **Visual Analysis**: Screenshot-based content analysis for complex layouts
+- **Real-time Processing**: Instant webhook responses with live data extraction
 
-## 🎯 What You Can Do
+## What You Can Do
 
 ### Data Collection Scenarios
 - **E-commerce Intelligence**: Product prices, reviews, inventory levels, competitor analysis
@@ -55,7 +55,7 @@ The system is designed for both technical and non-technical users, offering a si
 - Integrate with existing workflows through webhook API
 - Export data in multiple formats (JSON, CSV, structured datasets)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose installed
@@ -110,7 +110,7 @@ curl -X POST http://localhost:5678/webhook-test/67d77918-2d5b-48c1-ae73-2004b321
 }'
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Required API Keys
 - **BrightData API Key**: For web scraping service (sign up at BrightData)
@@ -128,7 +128,7 @@ curl -X POST http://localhost:5678/webhook-test/67d77918-2d5b-48c1-ae73-2004b321
 3. **Customize Data Extraction Fields** based on your needs
 4. **Set Proxy Settings** (optional) for large-scale operations
 
-## 📋 Step-by-Step Workflow Execution
+## Step-by-Step Workflow Execution
 
 ### 1. Input Processing
 The workflow receives your extraction request and processes the target URL and data requirements.
@@ -151,7 +151,7 @@ Applies intelligent parsing to structure the extracted data according to your sp
 ### 7. Response Generation
 Returns formatted JSON data ready for integration into your systems.
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 - **Workflow not responding**: Check if all Docker containers are running
@@ -172,6 +172,6 @@ For complex scraping scenarios, modify the workflow to include custom JavaScript
 
 Feel free to submit issues, feature requests, or improvements to make this scraping solution even more powerful and user-friendly.
 
-## 📄 License
+## License
 
 This project is open source and available under the [MIT License](LICENSE).
